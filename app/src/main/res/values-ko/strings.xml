@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">기록장</string>
+
+    <string name="edit">수정</string>
+    <string name="remove">삭제</string>
+    <string name="remove_highlight">강조 해제</string>
+    <string name="highlight">강조</string>
+
+    <string name="copy">복사</string>
+    <string name="share">공유</string>
+    <string name="add">추가</string>
+
+    <string name="cancel">취소</string>
+    <string name="confirm">확인</string>
+    <string name="ok">확인</string>
+
+    <string name="setting">설정</string>
+    <string name="timezone">시간대</string>
+    <string name="backup">백업</string>
+    <string name="date_format">날짜 형식</string>
+
+    <string name="copy_message">클립보드에 복사되었습니다.</string>
+    <string name="get_share_message">저장되었습니다.</string>
+    <string name="backup_message">백업 위치를 선택합니다.</string>
+    <string name="remove_date_message">이 날짜의 메모를 모두 삭제합니다.\n(되돌릴 수 없습니다)</string>
+
+    <string name="reset">초기화</string>
+
+    <string name="save">저장</string>
+    <string name="menu">메뉴</string>
+    <string name="theme">테마</string>
+    <string name="undo">되돌리기</string>
+
+    <string name="allow_keypad_prediction">키패드 예측 기능</string>
+
+    <string-array name="db_help">
+        <item>메모 클릭 → 수정, 삭제</item>
+        <item>메모 길게 누르기 → 강조, 복사, 공유</item>
+        <item>날짜 길게 누르기 → 삭제, 복사, 공유 (해당 날짜의 모든 메모)</item>
+        <item>두 손가락으로 줌인/줌아웃 → 글자 크기 변경</item>
+        <item>다른 어플에서 텍스트를 공유하여 이 어플에 저장할 수 있습니다.</item>
+        <item>마지막 삭제는 되돌릴 수 있습니다.</item>
+    </string-array>
+
+    <string name="date_format_help">"YYYY&#8211;M&#8211;D (DDD) → 2019&#8211;1&#8211;7 (월)\n\nYYYY → 2019, YY → 19\nM → 1, MM → 01, SM → _1\nD → 7, DD → 07, SD → _7\nDDD → 월, Ddd → 月, DDDD → 월요일\nMMM → APR, Mmm → Apr, MMMM → April\n"</string>
+
+    <string-array name="df_DDD">
+        <item>월</item>
+        <item>화</item>
+        <item>수</item>
+        <item>목</item>
+        <item>금</item>
+        <item>토</item>
+        <item>일</item>
+    </string-array>
+
+    <string-array name="df_Ddd">
+        <item>月</item>
+        <item>火</item>
+        <item>水</item>
+        <item>木</item>
+        <item>金</item>
+        <item>土</item>
+        <item>日</item>
+    </string-array>
+
+    <string-array name="df_DDDD">
+        <item>월요일</item>
+        <item>화요일</item>
+        <item>수요일</item>
+        <item>목요일</item>
+        <item>금요일</item>
+        <item>토요일</item>
+        <item>일요일</item>
+    </string-array>
+
+    <string-array name="df_MMM">
+        <item>JAN</item>
+        <item>FEB</item>
+        <item>MAR</item>
+        <item>APR</item>
+        <item>JUN</item>
+        <item>JUL</item>
+        <item>AUG</item>
+        <item>SEP</item>
+        <item>OCT</item>
+        <item>NOV</item>
+        <item>DEC</item>
+    </string-array>
+
+    <string-array name="df_Mmm">
+        <item>Jan</item>
+        <item>Feb</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Sep</item>
+        <item>Oct</item>
+        <item>Nov</item>
+        <item>Dec</item>
+    </string-array>
+
+    <string-array name="df_MMMM">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
+    <!--
+    YYYY-M-D (DDD) → 2019-1-7 (MON)
+
+    YYYY → 2019  YY → 19
+    M → 1, MM → 01, SM → _1
+    D → 7, DD → 07, SD → _7
+    DDD → 월, Ddd → 月, DDDD → 월요일
+    MMM → APR, Mmm → Apr, MMMM → April
+
+    YYYY&#8211;M&#8211;D (DDD) → 2019&#8211;1&#8211;7 (MON)\n\nYYYY → 2019, YY → 19\nM → 1, MM → 01, SM → _1\nD → 7, DD → 07, SD → _7\nDDD → 월, Ddd → 月, DDDD → 월요일\nMMM → APR, Mmm → Apr, MMMM → April\n
+    -->
+
+</resources>

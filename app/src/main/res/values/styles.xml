@@ -1,0 +1,10 @@
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimaryDark">@android:color/transparent</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colorWindowBackground</item>
+
+        <item name="colorControlHighlight">@android:color/white</item>
+    </style>
+    <style name="DarkPopupMenuTheme" parent="Theme.AppCompat" />
+</resources>
