@@ -7,40 +7,40 @@
     <color name="colorBackground">#222222</color>
     <color name="w_colorBackground">#ffffff</color>
 
+    <color name="SUN">#ff7070</color>
     <color name="MON">#5c9dff</color>
     <color name="TUE">#ffb060</color>
     <color name="WED">#90f0f0</color>
     <color name="THU">#88f888</color>
     <color name="FRI">#ffff80</color>
     <color name="SAT">#b983ff</color>
-    <color name="SUN">#ff7070</color>
 
+    <color name="w_SUN">#ff0080</color>
     <color name="w_MON">#3284ff</color>
     <color name="w_TUE">#ff8000</color>
     <color name="w_WED">#00cccc</color>
     <color name="w_THU">#00b300</color>
     <color name="w_FRI">#b3b300</color>
     <color name="w_SAT">#dd33ff</color>
-    <color name="w_SUN">#ff0080</color>
 
     <integer-array name="week_color">
+        <item>@color/SUN</item>
         <item>@color/MON</item>
         <item>@color/TUE</item>
         <item>@color/WED</item>
         <item>@color/THU</item>
         <item>@color/FRI</item>
         <item>@color/SAT</item>
-        <item>@color/SUN</item>
     </integer-array>
 
     <integer-array name="w_week_color">
+        <item>@color/w_SUN</item>
         <item>@color/w_MON</item>
         <item>@color/w_TUE</item>
         <item>@color/w_WED</item>
         <item>@color/w_THU</item>
         <item>@color/w_FRI</item>
         <item>@color/w_SAT</item>
-        <item>@color/w_SUN</item>
     </integer-array>
 
     <color name="colorHighlight">#ffff5c</color>

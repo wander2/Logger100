@@ -1,5 +1,6 @@
 package park.haneol.project.logger.holder;
 
+import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
@@ -25,6 +26,8 @@ public class DateHolder extends BaseHolder {
         super(itemView);
         timeView = itemView.findViewById(R.id.textView_time);
         logView = itemView.findViewById(R.id.textView_log);
+        timeView.setText("     ");
+        logView.setTypeface(Typeface.MONOSPACE);
         anchorView = itemView.findViewById(R.id.view_anchor);
         itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -37,11 +40,10 @@ public class DateHolder extends BaseHolder {
 
     @Override
     public void setItem(BaseItem item) {
-        String dateString = "     " + ((DateItem) item).getDateString();
-        timeView.setText(dateString);
-
-        week = ((DateItem) item).getWeek();
-        timeView.setTextColor(ColorUtil.WEEK_COLOR[week]);
+        DateItem dateItem = (DateItem) item;
+        week = dateItem.getWeek();
+        logView.setText(dateItem.getDateString());
+        logView.setTextColor(ColorUtil.WEEK_COLOR[week]);
     }
 
     @Override
@@ -56,7 +58,7 @@ public class DateHolder extends BaseHolder {
     @Override
     public void applyColor() {
         if (week != -1) {
-            timeView.setTextColor(ColorUtil.WEEK_COLOR[week]);
+            logView.setTextColor(ColorUtil.WEEK_COLOR[week]);
         }
         ColorUtil.setItemBackground(itemView);
     }

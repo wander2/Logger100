@@ -40,60 +40,34 @@
         <item>날짜 길게 누르기 → 삭제, 복사, 공유 (해당 날짜의 모든 메모)</item>
         <item>두 손가락으로 줌인/줌아웃 → 글자 크기 변경</item>
         <item>다른 어플에서 텍스트를 공유하여 이 어플에 저장할 수 있습니다.</item>
-        <item>마지막 삭제는 되돌릴 수 있습니다.</item>
     </string-array>
 
-    <string name="date_format_help">"YYYY&#8211;M&#8211;D (DDD) → 2019&#8211;1&#8211;7 (월)\n\nYYYY → 2019, YY → 19\nM → 1, MM → 01, SM → _1\nD → 7, DD → 07, SD → _7\nDDD → 월, Ddd → 月, DDDD → 월요일\nMMM → APR, Mmm → Apr, MMMM → April\n"</string>
-
-    <string-array name="df_DDD">
+    <string-array name="df_week_short"> <!--ddd-->
+        <item>일</item>
         <item>월</item>
         <item>화</item>
         <item>수</item>
         <item>목</item>
         <item>금</item>
         <item>토</item>
-        <item>일</item>
     </string-array>
 
-    <string-array name="df_Ddd">
+    <string-array name="df_week"> <!--dddd-->
+        <item>日</item>
         <item>月</item>
         <item>火</item>
         <item>水</item>
         <item>木</item>
         <item>金</item>
         <item>土</item>
-        <item>日</item>
     </string-array>
 
-    <string-array name="df_DDDD">
-        <item>월요일</item>
-        <item>화요일</item>
-        <item>수요일</item>
-        <item>목요일</item>
-        <item>금요일</item>
-        <item>토요일</item>
-        <item>일요일</item>
-    </string-array>
-
-    <string-array name="df_MMM">
-        <item>JAN</item>
-        <item>FEB</item>
-        <item>MAR</item>
-        <item>APR</item>
-        <item>JUN</item>
-        <item>JUL</item>
-        <item>AUG</item>
-        <item>SEP</item>
-        <item>OCT</item>
-        <item>NOV</item>
-        <item>DEC</item>
-    </string-array>
-
-    <string-array name="df_Mmm">
+    <string-array name="df_month_short"> <!--mmm-->
         <item>Jan</item>
         <item>Feb</item>
         <item>Mar</item>
         <item>Apr</item>
+        <item>May</item>
         <item>Jun</item>
         <item>Jul</item>
         <item>Aug</item>
@@ -103,11 +77,12 @@
         <item>Dec</item>
     </string-array>
 
-    <string-array name="df_MMMM">
+    <string-array name="df_month"> <!--mmmm-->
         <item>January</item>
         <item>February</item>
         <item>March</item>
         <item>April</item>
+        <item>May</item>
         <item>June</item>
         <item>July</item>
         <item>August</item>
@@ -117,16 +92,16 @@
         <item>December</item>
     </string-array>
 
+    <string name="date_format_help">"예) 2019&#8211;4&#8211;2 (화)\n\n{YYYY} = 2019     {YY} = 19\n{M} = 4    {MM} = 04    {_M} = _4\n{D} = 2    {DD} = 02    {_D} = _2\n{DDD} = 화        {DDDD} = 火\n{n} = 줄바꿈"</string>
+
     <!--
-    YYYY-M-D (DDD) → 2019-1-7 (MON)
+    예) 2019-4-2 (화)
 
-    YYYY → 2019  YY → 19
-    M → 1, MM → 01, SM → _1
-    D → 7, DD → 07, SD → _7
-    DDD → 월, Ddd → 月, DDDD → 월요일
-    MMM → APR, Mmm → Apr, MMMM → April
-
-    YYYY&#8211;M&#8211;D (DDD) → 2019&#8211;1&#8211;7 (MON)\n\nYYYY → 2019, YY → 19\nM → 1, MM → 01, SM → _1\nD → 7, DD → 07, SD → _7\nDDD → 월, Ddd → 月, DDDD → 월요일\nMMM → APR, Mmm → Apr, MMMM → April\n
+    {YYYY} = 2019     {YY} = 19
+    {M} = 4    {MM} = 04    {_M} = _4
+    {D} = 2    {DD} = 02    {_D} = _2
+    {DDD} = 화        {DDDD} = 火
+    {n} = 줄바꿈
     -->
 
 </resources>

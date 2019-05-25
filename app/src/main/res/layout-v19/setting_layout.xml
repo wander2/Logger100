@@ -55,7 +55,7 @@
             android:id="@+id/setting_date_format"
             android:inputType="text"
             tools:ignore="autoFill"
-            android:hint="YYYY-M-D (DDD)"
+            android:hint="{YYYY}-{M}-{D} ({DDD})"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content" />

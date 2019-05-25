@@ -8,23 +8,19 @@ import park.haneol.project.logger.R;
 
 public class TimeUtil {
 
-    private static String[] df_DDD;
-    private static String[] df_Ddd;
-    private static String[] df_DDDD;
-    private static String[] df_MMM;
-    private static String[] df_Mmm;
-    private static String[] df_MMMM;
+    private static String[] df_week_short;
+    private static String[] df_week;
+    private static String[] df_month_short;
+    private static String[] df_month;
 
     private static final int[] MONTH_DAYS_NORMAL = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
     private static final int[] MONTH_DAYS_LEAP = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
 
     public static void init(Context context) {
-        df_DDD = context.getResources().getStringArray(R.array.df_DDD);
-        df_Ddd = context.getResources().getStringArray(R.array.df_Ddd);
-        df_DDDD = context.getResources().getStringArray(R.array.df_DDDD);
-        df_MMM = context.getResources().getStringArray(R.array.df_MMM);
-        df_Mmm = context.getResources().getStringArray(R.array.df_Mmm);
-        df_MMMM = context.getResources().getStringArray(R.array.df_MMMM);
+        df_week_short = context.getResources().getStringArray(R.array.df_week_short);
+        df_week = context.getResources().getStringArray(R.array.df_week);
+        df_month_short = context.getResources().getStringArray(R.array.df_month_short);
+        df_month = context.getResources().getStringArray(R.array.df_month);
     }
 
     // time -> Minutes
@@ -60,20 +56,23 @@ public class TimeUtil {
         final int month = each[1];
         final int days = each[2];
         final int week = each[3];
-        return PrefUtil.dateFormat.replace("YYYY", String.valueOf(year))
-                .replace("YY", getYY(year))
-                .replace("MMMM", df_MMMM[month-1])
-                .replace("MMM", df_MMM[month-1])
-                .replace("Mmm", df_Mmm[month-1])
-                .replace("MM", String.format(Locale.ENGLISH, "%02d", month))
-                .replace("SM", String.format(Locale.ENGLISH, "%1$2s", month))
-                .replace("M", String.valueOf(month))
-                .replace("DDDD", df_DDDD[week])
-                .replace("DDD", df_DDD[week])
-                .replace("Ddd", df_Ddd[week])
-                .replace("DD", String.format(Locale.ENGLISH, "%02d", days))
-                .replace("SD", String.format(Locale.ENGLISH, "%1$2s", days))
-                .replace("D", String.valueOf(days));
+        return PrefUtil.dateFormat.replace("{YYYY}", String.valueOf(year))
+                .replace("{YY}", getYY(year))
+                .replace("{MMMM}", df_month[month-1].toUpperCase())
+                .replace("{mmmm}", df_month[month-1])
+                .replace("{MMM}", df_month_short[month-1].toUpperCase())
+                .replace("{mmm}", df_month_short[month-1])
+                .replace("{MM}", String.format(Locale.ENGLISH, "%02d", month))
+                .replace("{_M}", String.format(Locale.ENGLISH, "%1$2s", month))
+                .replace("{M}", String.valueOf(month))
+                .replace("{DDDD}", df_week[week].toUpperCase())
+                .replace("{dddd}", df_week[week])
+                .replace("{DDD}", df_week_short[week].toUpperCase())
+                .replace("{ddd}", df_week_short[week])
+                .replace("{DD}", String.format(Locale.ENGLISH, "%02d", days))
+                .replace("{_D}", String.format(Locale.ENGLISH, "%1$2s", days))
+                .replace("{D}", String.valueOf(days))
+                .replace("{n}", "\n");
     }
 
     public static String getDefaultDateFormat(int time) {
@@ -140,8 +139,6 @@ public class TimeUtil {
         }
         return utc;
     }
-
-
 
     private static String getYY(int year) {
         String YYYY = String.valueOf(year);

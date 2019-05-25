@@ -40,60 +40,34 @@
         <item>Date long press → Remove, Copy, Share (All memo in that date)</item>
         <item>Zoom in/out → Font size change</item>
         <item>You can save text from another app by sharing to this app.</item>
-        <item>You can undo the latest removal.</item>
     </string-array>
 
-    <string name="date_format_help">"YYYY&#8211;M&#8211;D (DDD) → 2019&#8211;1&#8211;7 (MON)\n\nYYYY → 2019, YY → 19\nM → 1, MM → 01, SM → _1\nD → 7, DD → 07, SD → _7\nDDD → MON, Ddd → Mon, DDDD → Monday\nMMM → APR, Mmm → Apr, MMMM → April\n"</string>
-
-    <string-array name="df_DDD">
-        <item>MON</item>
-        <item>TUE</item>
-        <item>WED</item>
-        <item>THU</item>
-        <item>FRI</item>
-        <item>SAT</item>
-        <item>SUN</item>
-    </string-array>
-
-    <string-array name="df_Ddd">
+    <string-array name="df_week_short"> <!--ddd-->
+        <item>Sun</item>
         <item>Mon</item>
         <item>Tue</item>
         <item>Wed</item>
         <item>Thu</item>
         <item>Fri</item>
         <item>Sat</item>
-        <item>Sun</item>
     </string-array>
 
-    <string-array name="df_DDDD">
+    <string-array name="df_week"> <!--dddd-->
+        <item>Sunday</item>
         <item>Monday</item>
         <item>Tuesday</item>
         <item>Wednesday</item>
         <item>Thursday</item>
         <item>Friday</item>
         <item>Saturday</item>
-        <item>Sunday</item>
     </string-array>
 
-    <string-array name="df_MMM">
-        <item>JAN</item>
-        <item>FEB</item>
-        <item>MAR</item>
-        <item>APR</item>
-        <item>JUN</item>
-        <item>JUL</item>
-        <item>AUG</item>
-        <item>SEP</item>
-        <item>OCT</item>
-        <item>NOV</item>
-        <item>DEC</item>
-    </string-array>
-
-    <string-array name="df_Mmm">
+    <string-array name="df_month_short"> <!--mmm-->
         <item>Jan</item>
         <item>Feb</item>
         <item>Mar</item>
         <item>Apr</item>
+        <item>May</item>
         <item>Jun</item>
         <item>Jul</item>
         <item>Aug</item>
@@ -103,11 +77,12 @@
         <item>Dec</item>
     </string-array>
 
-    <string-array name="df_MMMM">
+    <string-array name="df_month"> <!--mmmm-->
         <item>January</item>
         <item>February</item>
         <item>March</item>
         <item>April</item>
+        <item>May</item>
         <item>June</item>
         <item>July</item>
         <item>August</item>
@@ -117,16 +92,20 @@
         <item>December</item>
     </string-array>
 
+    <string name="date_format_help">"ex) 2019&#8211;4&#8211;2 (TUE)\n\n{YYYY} = 2019     {YY} = 19\n{M} = 4    {MM} = 04    {_M} = _4\n{D} = 2    {DD} = 02    {_D} = _2\n\n{MMMM} = APRIL    {DDDD} = MONDAY\n{mmmm} = April    {dddd} = Monday\n{MMM} = APR       {DDD} = MON\n{mmm} = Apr       {ddd} = Mon\n{n} = New Line"</string>
+
     <!--
-    YYYY-M-D (DDD) → 2019-1-7 (MON)
+    ex) 2019-4-2 (TUE)
 
-    YYYY → 2019, YY → 19
-    M → 1, MM → 01, SM → _1
-    D → 7, DD → 07, SD → _7
-    DDD → MON, Ddd → Mon, DDDD → Monday
-    MMM → APR, Mmm → Apr, MMMM → April
+    {YYYY} = 2019     {YY} = 19
+    {M} = 4    {MM} = 04    {_M} = _4
+    {D} = 2    {DD} = 02    {_D} = _2
 
-    YYYY&#8211;M&#8211;D (DDD) → 2019&#8211;1&#8211;7 (MON)\n\nYYYY → 2019, YY → 19\nM → 1, MM → 01, SM → _1\nD → 7, DD → 07, SD → _7\nDDD → MON, Ddd → Mon, DDDD → Monday\nMMM → APR, Mmm → Apr, MMMM → April\n
+    {MMMM} = APRIL    {DDDD} = MONDAY
+    {mmmm} = April    {dddd} = Monday
+    {MMM} = APR       {DDD} = MON
+    {mmm} = Apr       {ddd} = Mon
+    {n} = New Line
     -->
 
 </resources>

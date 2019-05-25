@@ -6,8 +6,8 @@ android {
         applicationId "park.haneol.project.logger"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 104
-        versionName "104-190520"
+        versionCode 106
+        versionName "106-190525"
     }
     buildTypes {
         release {

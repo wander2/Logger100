@@ -141,7 +141,7 @@ public class PrefUtil {
     static String dateFormat;
 
     private static String getDateFormat(Context context) {
-        return getPref(context).getString(KEY_DATE_FORMAT, "YYYY-M-D (DDD)");
+        return getPref(context).getString(KEY_DATE_FORMAT, "{YYYY}-{M}-{D} ({DDD})");
     }
 
     static void setDateFormat(Context context, String dateFormat) {
