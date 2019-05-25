@@ -92,15 +92,15 @@
         <item>December</item>
     </string-array>
 
-    <string name="date_format_help">"예) 2019&#8211;4&#8211;2 (화)\n\n{YYYY} = 2019     {YY} = 19\n{M} = 4    {MM} = 04    {_M} = _4\n{D} = 2    {DD} = 02    {_D} = _2\n{DDD} = 화        {DDDD} = 火\n{n} = 줄바꿈"</string>
+    <string name="date_format_help">"예) 2019&#8211;4&#8211;2 (화)\n\n{YYYY} = 2019 {YY} = 19\n{M} = 4 {MM} = 04 {_M} = _4\n{D} = 2 {DD} = 02 {_D} = _2\n{DDD} = 화 {DDDD} = 火\n{n} = 줄바꿈"</string>
 
     <!--
     예) 2019-4-2 (화)
 
-    {YYYY} = 2019     {YY} = 19
-    {M} = 4    {MM} = 04    {_M} = _4
-    {D} = 2    {DD} = 02    {_D} = _2
-    {DDD} = 화        {DDDD} = 火
+    {YYYY} = 2019 {YY} = 19
+    {M} = 4 {MM} = 04 {_M} = _4
+    {D} = 2 {DD} = 02 {_D} = _2
+    {DDD} = 화 {DDDD} = 火
     {n} = 줄바꿈
     -->
 

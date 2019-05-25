@@ -1,5 +1,6 @@
 package park.haneol.project.logger.util;
 
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -263,6 +264,15 @@ public class ActionManager {
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, text);
         context.startActivity(Intent.createChooser(intent, "공유하기"));
+        /*
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + text));
+        try {
+            intent.setPackage("com.google.android.apps.maps");
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            context.startActivity(intent);
+        }
+        */
         // 결과 리스너 https://medium.com/code-with-lisa/get-results-from-android-chooser-9cfc5445a871
     }
 

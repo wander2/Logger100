@@ -92,19 +92,19 @@
         <item>December</item>
     </string-array>
 
-    <string name="date_format_help">"ex) 2019&#8211;4&#8211;2 (TUE)\n\n{YYYY} = 2019     {YY} = 19\n{M} = 4    {MM} = 04    {_M} = _4\n{D} = 2    {DD} = 02    {_D} = _2\n\n{MMMM} = APRIL    {DDDD} = MONDAY\n{mmmm} = April    {dddd} = Monday\n{MMM} = APR       {DDD} = MON\n{mmm} = Apr       {ddd} = Mon\n{n} = New Line"</string>
+    <string name="date_format_help">"ex) 2019&#8211;4&#8211;2 (TUE)\n\n{YYYY} = 2019 {YY} = 19\n{M} = 4 {MM} = 04 {_M} = _4\n{D} = 2 {DD} = 02 {_D} = _2\n\n{MMMM} = APRIL {DDDD} = MONDAY\n{mmmm} = April {dddd} = Monday\n{MMM} = APR    {DDD} = MON\n{mmm} = Apr    {ddd} = Mon\n{n} = New Line"</string>
 
     <!--
     ex) 2019-4-2 (TUE)
 
-    {YYYY} = 2019     {YY} = 19
-    {M} = 4    {MM} = 04    {_M} = _4
-    {D} = 2    {DD} = 02    {_D} = _2
+    {YYYY} = 2019 {YY} = 19
+    {M} = 4 {MM} = 04 {_M} = _4
+    {D} = 2 {DD} = 02 {_D} = _2
 
-    {MMMM} = APRIL    {DDDD} = MONDAY
-    {mmmm} = April    {dddd} = Monday
-    {MMM} = APR       {DDD} = MON
-    {mmm} = Apr       {ddd} = Mon
+    {MMMM} = APRIL {DDDD} = MONDAY
+    {mmmm} = April {dddd} = Monday
+    {MMM} = APR    {DDD} = MON
+    {mmm} = Apr    {ddd} = Mon
     {n} = New Line
     -->
 
