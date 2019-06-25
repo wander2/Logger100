@@ -1,6 +1,8 @@
 package park.haneol.project.logger.util;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
@@ -37,14 +39,13 @@ public class UIUtil {
 
     public static void fitSystemWindows(View view, Rect insets) {
         if (Build.VERSION.SDK_INT >= 19) {
-            Log.d("AAA", "FIT " + fitCount);
             // 스테이터스 바 높이
             if (statusHeight == 0 && insets.top != 0) {
                 statusHeight = insets.top;
             }
             insets.top = 0;
 
-            if (keypadShown && PrefUtil.onStartKeypad && !isPopupEditing) {
+            if (keypadShown && PrefUtil.onStartKeypad && !isPopupEditing && !isHardwareKeyboard(view.getContext())) {
                 if (fitCount == 0) {
                     predictMargin(view, true);
                     insetsBottomBefore = PrefUtil.keypadHeight;
@@ -95,6 +96,10 @@ public class UIUtil {
                 keypadShown = true;
             }
         }
+    }
+
+    private static boolean isHardwareKeyboard(Context context) {
+        return context.getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS;
     }
 
 }
