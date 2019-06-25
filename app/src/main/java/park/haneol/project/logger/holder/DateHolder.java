@@ -20,14 +20,13 @@ public class DateHolder extends BaseHolder {
     private TextView logView;
     private View anchorView;
 
-    private int week = -1;
-
     public DateHolder(@NonNull View itemView, final ActionManager actionManager) {
         super(itemView);
         timeView = itemView.findViewById(R.id.textView_time);
         logView = itemView.findViewById(R.id.textView_log);
         timeView.setText("     ");
         logView.setTypeface(Typeface.MONOSPACE);
+        logView.setTextColor(ColorUtil.colorTime);
         anchorView = itemView.findViewById(R.id.view_anchor);
         itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -41,9 +40,7 @@ public class DateHolder extends BaseHolder {
     @Override
     public void setItem(BaseItem item) {
         DateItem dateItem = (DateItem) item;
-        week = dateItem.getWeek();
         logView.setText(dateItem.getDateString());
-        logView.setTextColor(ColorUtil.WEEK_COLOR[week]);
     }
 
     @Override
@@ -57,12 +54,7 @@ public class DateHolder extends BaseHolder {
 
     @Override
     public void applyColor() {
-        if (week != -1) {
-            logView.setTextColor(ColorUtil.WEEK_COLOR[week]);
-        }
         ColorUtil.setItemBackground(itemView);
     }
-
-
 
 }

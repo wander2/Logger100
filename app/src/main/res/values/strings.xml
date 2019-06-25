@@ -62,6 +62,16 @@
         <item>Saturday</item>
     </string-array>
 
+    <string-array name="df_week_han"> <!--W-->
+        <item>日</item>
+        <item>月</item>
+        <item>火</item>
+        <item>水</item>
+        <item>木</item>
+        <item>金</item>
+        <item>土</item>
+    </string-array>
+
     <string-array name="df_month_short"> <!--mmm-->
         <item>Jan</item>
         <item>Feb</item>
@@ -92,20 +102,25 @@
         <item>December</item>
     </string-array>
 
-    <string name="date_format_help">"ex) 2019&#8211;4&#8211;2 (TUE)\n\n{YYYY} = 2019 {YY} = 19\n{M} = 4 {MM} = 04 {_M} = _4\n{D} = 2 {DD} = 02 {_D} = _2\n\n{MMMM} = APRIL {DDDD} = MONDAY\n{mmmm} = April {dddd} = Monday\n{MMM} = APR    {DDD} = MON\n{mmm} = Apr    {ddd} = Mon\n{n} = New Line"</string>
-
+    <string name="date_format_help">"ex) 2019&#8211;4&#8211;2 (TUE)\n{YYYY} = 2019 {YY} = 19\n{M} = 4 {MM} = 04 {_M} = _4\n{D} = 2 {DD} = 02 {_D} = _2\n{MMMM} = APRIL {DDDD} = MONDAY\n{mmmm} = April {dddd} = Monday\n{MMM} = APR    {DDD} = MON\n{mmm} = Apr    {ddd} = Mon\n{W} = 火       {n} = New Line\nDay of week color setting\n{wf} = from    {wt} = to"</string>
     <!--
     ex) 2019-4-2 (TUE)
-
     {YYYY} = 2019 {YY} = 19
     {M} = 4 {MM} = 04 {_M} = _4
     {D} = 2 {DD} = 02 {_D} = _2
-
     {MMMM} = APRIL {DDDD} = MONDAY
     {mmmm} = April {dddd} = Monday
     {MMM} = APR    {DDD} = MON
     {mmm} = Apr    {ddd} = Mon
-    {n} = New Line
+    {W} = 火       {n} = New Line
+    Day of week color setting
+    {wf} = from    {wt} = to
+    -->
+
+    <string name="help_predict_keypad">"* This setting helps app starting smoother.\n* Warning) It may not work properly under certain circumstances."</string>
+    <!--
+    * This setting helps app starting smoother.
+    * Warning) It may not work properly under certain circumstances.
     -->
 
 </resources>

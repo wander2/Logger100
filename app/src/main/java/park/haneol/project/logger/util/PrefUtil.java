@@ -21,6 +21,11 @@ public class PrefUtil {
         onStartKeypad = getOnStartKeypad(context);
         themeNumber = getThemeColorNumber(context);
         dateFormat = getDateFormat(context);
+        int currentVersion = getCurrentVersion(context);
+        if (currentVersion < 109) {
+            setCurrentVersion(context, 109);
+            setDateFormat(context, "{YYYY}-{M}-{D} {wf}({DDD}){wt}");
+        }
     }
 
 
@@ -141,13 +146,43 @@ public class PrefUtil {
     static String dateFormat;
 
     private static String getDateFormat(Context context) {
-        return getPref(context).getString(KEY_DATE_FORMAT, "{YYYY}-{M}-{D} ({DDD})");
+        return getPref(context).getString(KEY_DATE_FORMAT, "{YYYY}-{M}-{D} {wf}({DDD}){wt}");
     }
 
     static void setDateFormat(Context context, String dateFormat) {
         getPref(context).edit().putString(KEY_DATE_FORMAT, dateFormat).apply();
         PrefUtil.dateFormat = dateFormat;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // version > 109
+
+    // 109 버전에서 date format 초기화
+
+    private static final String KEY_CURRENT_VERSION = "current_version";
+
+    private static int getCurrentVersion(Context context) {
+        return getPref(context).getInt(KEY_CURRENT_VERSION, 0);
+    }
+
+    private static void setCurrentVersion(Context context, int currentVersion) {
+        getPref(context).edit().putInt(KEY_CURRENT_VERSION, currentVersion).apply();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////

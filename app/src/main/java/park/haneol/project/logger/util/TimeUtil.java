@@ -1,6 +1,9 @@
 package park.haneol.project.logger.util;
 
 import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 
 import java.util.Locale;
 
@@ -10,6 +13,7 @@ public class TimeUtil {
 
     private static String[] df_week_short;
     private static String[] df_week;
+    private static String[] df_week_han;
     private static String[] df_month_short;
     private static String[] df_month;
 
@@ -19,6 +23,7 @@ public class TimeUtil {
     public static void init(Context context) {
         df_week_short = context.getResources().getStringArray(R.array.df_week_short);
         df_week = context.getResources().getStringArray(R.array.df_week);
+        df_week_han = context.getResources().getStringArray(R.array.df_week_han);
         df_month_short = context.getResources().getStringArray(R.array.df_month_short);
         df_month = context.getResources().getStringArray(R.array.df_month);
     }
@@ -50,13 +55,14 @@ public class TimeUtil {
         return sb.toString();
     }
 
-    public static String getDateString(int time) {
+    public static Spannable getDateString(int time) {
         final int[] each = getEach(time);
         final int year = each[0];
         final int month = each[1];
         final int days = each[2];
         final int week = each[3];
-        return PrefUtil.dateFormat.replace("{YYYY}", String.valueOf(year))
+        String dateString = PrefUtil.dateFormat
+                .replace("{YYYY}", String.valueOf(year))
                 .replace("{YY}", getYY(year))
                 .replace("{MMMM}", df_month[month-1].toUpperCase())
                 .replace("{mmmm}", df_month[month-1])
@@ -65,14 +71,40 @@ public class TimeUtil {
                 .replace("{MM}", String.format(Locale.ENGLISH, "%02d", month))
                 .replace("{_M}", String.format(Locale.ENGLISH, "%1$2s", month))
                 .replace("{M}", String.valueOf(month))
-                .replace("{DDDD}", df_week[week].toUpperCase())
-                .replace("{dddd}", df_week[week])
-                .replace("{DDD}", df_week_short[week].toUpperCase())
-                .replace("{ddd}", df_week_short[week])
                 .replace("{DD}", String.format(Locale.ENGLISH, "%02d", days))
                 .replace("{_D}", String.format(Locale.ENGLISH, "%1$2s", days))
                 .replace("{D}", String.valueOf(days))
                 .replace("{n}", "\n");
+        /*
+        int weekStart; int weekEnd = -1;
+        if ((weekStart = dateString.indexOf("{DDDD}")) != -1) {
+            weekEnd = weekStart + df_week[week].toUpperCase().length();
+        } else if ((weekStart = dateString.indexOf("{dddd}")) != -1) {
+            weekEnd = weekStart + df_week[week].length();
+        } else if ((weekStart = dateString.indexOf("{DDD}")) != -1) {
+            weekEnd = weekStart + df_week_short[week].toUpperCase().length();
+        } else if ((weekStart = dateString.indexOf("{ddd}")) != -1) {
+            weekEnd = weekStart + df_week_short[week].length();
+        } else if ((weekStart = dateString.indexOf("{W}")) != -1) {
+            weekEnd = weekStart + df_week_han[week].length();
+        }
+        */
+        dateString = dateString
+                .replace("{DDDD}", df_week[week].toUpperCase())
+                .replace("{dddd}", df_week[week])
+                .replace("{DDD}", df_week_short[week].toUpperCase())
+                .replace("{ddd}", df_week_short[week])
+                .replace("{W}", df_week_han[week]);
+        int weekStart = dateString.indexOf("{wf}");
+        dateString = dateString.replace("{wf}", "");
+        int weekEnd = dateString.indexOf("{wt}");
+        dateString = dateString.replace("{wt}", "");
+        SpannableString spannable = new SpannableString(dateString);
+        int weekColor = ColorUtil.WEEK_COLOR[week];
+        if (weekStart != -1 && weekEnd != -1) {
+            spannable.setSpan(new ForegroundColorSpan(weekColor), weekStart, weekEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return spannable;
     }
 
     public static String getDefaultDateFormat(int time) {
@@ -83,7 +115,7 @@ public class TimeUtil {
         return year + "-" + month + "-" + days;
     }
 
-    public static int getWeek(int days) {
+    private static int getWeek(int days) {
         return (days + 4) % 7;
     }
 

@@ -2,6 +2,7 @@ package park.haneol.project.logger.component;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -70,6 +71,21 @@ public class MainActivity extends AppCompatActivity {
         String textPres = PrefUtil.getTextPreserved(this);
         editText.setText(textPres);
         editText.setSelection(textPres.length());
+        // 엔터 동작
+        editText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d("AAA", "ID: "+keyCode);
+                //Log.d("AAA", event.toString());
+                /*
+                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    actionManager.onClickSaveButton();
+                    return true;
+                }
+                */
+                return false;
+            }
+        });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        if (!(Build.VERSION.SDK_INT >= 24 && isInMultiWindowMode()) && !UIUtil.isPopupEditing && UIUtil.keypadShown) {
+        if (Build.VERSION.SDK_INT >= 24 && !UIUtil.isPopupEditing && UIUtil.keypadShown) {
             UIUtil.fitCount = 0; // 초기화
         }
         UIUtil.setKeypadShown(getWindow(), UIUtil.keypadShown);
@@ -114,6 +130,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         database.close();
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        if (Build.VERSION.SDK_INT >= 24 && isInMultiWindowMode()) {
+            UIUtil.fitCount = 1;
+        }
+        super.onResume();
+    }
+
+    @Override
+    protected void onRestart() {
+        if (UIUtil.fitCount == 0) {
+            UIUtil.fitCount = 1;
+            UIUtil.predictMargin(rootLayout, false);
+        }
+        super.onRestart();
     }
 
     // 공유 받음

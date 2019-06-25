@@ -3,6 +3,7 @@ package park.haneol.project.logger.util;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -36,6 +37,7 @@ public class UIUtil {
 
     public static void fitSystemWindows(View view, Rect insets) {
         if (Build.VERSION.SDK_INT >= 19) {
+            Log.d("AAA", "FIT " + fitCount);
             // 스테이터스 바 높이
             if (statusHeight == 0 && insets.top != 0) {
                 statusHeight = insets.top;

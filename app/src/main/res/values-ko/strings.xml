@@ -53,6 +53,16 @@
     </string-array>
 
     <string-array name="df_week"> <!--dddd-->
+        <item>일요일</item>
+        <item>월요일</item>
+        <item>화요일</item>
+        <item>수요일</item>
+        <item>목요일</item>
+        <item>금요일</item>
+        <item>토요일</item>
+    </string-array>
+
+    <string-array name="df_week_han"> <!--W-->
         <item>日</item>
         <item>月</item>
         <item>火</item>
@@ -92,16 +102,22 @@
         <item>December</item>
     </string-array>
 
-    <string name="date_format_help">"예) 2019&#8211;4&#8211;2 (화)\n\n{YYYY} = 2019 {YY} = 19\n{M} = 4 {MM} = 04 {_M} = _4\n{D} = 2 {DD} = 02 {_D} = _2\n{DDD} = 화 {DDDD} = 火\n{n} = 줄바꿈"</string>
-
+    <string name="date_format_help">"예) 2019&#8211;4&#8211;2 (화)\n{YYYY} = 2019 {YY} = 19\n{M} = 4 {MM} = 04 {_M} = _4\n{D} = 2 {DD} = 02 {_D} = _2\n{DDD} = 화 {DDDD} = 화요일\n{W} = 火  {n} = 줄바꿈\n요일별 색상설정\n{wf} = 부터 {wt} = 까지"</string>
     <!--
     예) 2019-4-2 (화)
-
     {YYYY} = 2019 {YY} = 19
     {M} = 4 {MM} = 04 {_M} = _4
     {D} = 2 {DD} = 02 {_D} = _2
-    {DDD} = 화 {DDDD} = 火
-    {n} = 줄바꿈
+    {DDD} = 화 {DDDD} = 화요일
+    {W} = 火  {n} = 줄바꿈
+    요일별 색상설정
+    {wf} = 부터 {wt} = 까지
+    -->
+
+    <string name="help_predict_keypad">"* 이 기능은 어플이 부드럽게 실행되도록 해줍니다.\n* 주의) 특정 상황에서 제대로 동작하지 않을 수 있습니다."</string>
+    <!--
+    * 이 기능은 어플이 부드럽게 실행되도록 해줍니다.
+    * 주의) 특정 상황에서 제대로 동작하지 않을 수 있습니다.
     -->
 
 </resources>

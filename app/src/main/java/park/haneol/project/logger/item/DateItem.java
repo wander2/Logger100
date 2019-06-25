@@ -1,5 +1,7 @@
 package park.haneol.project.logger.item;
 
+import android.text.Spannable;
+
 import park.haneol.project.logger.util.TimeUtil;
 
 public class DateItem extends BaseItem {
@@ -15,16 +17,12 @@ public class DateItem extends BaseItem {
         return -TimeUtil.getLocalDays(time);
     }
 
-    public String getDateString() {
+    public Spannable getDateString() {
         return TimeUtil.getDateString(time);
     }
 
     public String getDateFormat() {
         return TimeUtil.getDefaultDateFormat(time);
-    }
-
-    public int getWeek() {
-        return TimeUtil.getWeek(TimeUtil.getLocalDays(time));
     }
 
 }
