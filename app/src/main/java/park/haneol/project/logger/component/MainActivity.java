@@ -75,14 +75,10 @@ public class MainActivity extends AppCompatActivity {
         editText.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                //Log.d("AAA", "ID: "+keyCode);
-                //Log.d("AAA", event.toString());
-                /*
-                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && !event.isShiftPressed()) {
                     actionManager.onClickSaveButton();
                     return true;
                 }
-                */
                 return false;
             }
         });
