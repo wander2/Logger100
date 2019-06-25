@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
-        UIUtil.predictMargin(rootLayout, !isInMultiWindowMode);
-        UIUtil.keypadShown = !isInMultiWindowMode;
+        UIUtil.predictMargin(rootLayout, false);
+        UIUtil.keypadShown = false;
     }
 }
