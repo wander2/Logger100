@@ -1,5 +1,6 @@
 package park.haneol.project.logger.component;
 
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         editText.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && !event.isShiftPressed()) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_INSERT) {
                     actionManager.onClickSaveButton();
                     return true;
                 }
@@ -109,6 +110,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ActivityObserver.getInstance().setActivity(this);
+
+        // todo : 시작할 때 방향 감지
+        //android:configChanges="screenSize|orientation|screenLayout|navigation"
+        //onConfigurationChanged
+        //orientEventListener = new OrientationEventListener(this,
+        //                SensorManager.SENSOR_DELAY_NORMAL) {
+        /*
+        Configuration newConfig = getResources().getConfiguration();
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // landscape
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // portrait
+        }
+        */
     }
 
     @Override

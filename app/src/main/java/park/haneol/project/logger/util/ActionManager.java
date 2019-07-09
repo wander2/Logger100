@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -26,6 +27,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -40,8 +43,6 @@ import park.haneol.project.logger.item.LogItem;
 import park.haneol.project.logger.recyclerview.DataAdapter;
 import park.haneol.project.logger.recyclerview.RecView;
 import park.haneol.project.logger.view.RootLayout;
-
-// todo : 공유버튼 분리하기
 
 public class ActionManager {
 
@@ -142,6 +143,7 @@ public class ActionManager {
         popupEditText.setText(item.getText());
         popupEditText.setSelection(item.getText().length());
         popupEditText.requestFocus();
+        popupEditText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
         // Make Dialog
         AlertDialog dialog = new AlertDialog.Builder(context)
@@ -194,11 +196,43 @@ public class ActionManager {
         undoButton.setVisibility(View.VISIBLE);
     }
 
-    private void onEditConfirm(LogItem item, int position, String text) {
+    private void onEditConfirm(LogItem item, final int position, String text) {
         item.setText(text);
         adapter.notifyItemChanged(position);
         database.updateText(item.getId(), text);
         recView.startBlinkAnimation(position);
+
+        // 수정 후 화면 밖으로 나가는 문제 해결
+        recView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                RecyclerView.ViewHolder holder = recView.findViewHolderForAdapterPosition(position);
+                if (holder != null) {
+                    int top = holder.itemView.getTop();
+                    int bot = holder.itemView.getBottom();
+                    int size = holder.itemView.getHeight();
+                    int height = recView.getHeight();
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recView.getLayoutManager();
+                    if (size > height) {
+                        if (top < 0 && bot < height) {
+                            if (layoutManager != null) {
+                                layoutManager.scrollToPositionWithOffset(position, height-size);
+                            }
+                        } else if (top > 0 && bot > height) {
+                            recView.scrollToPosition(position);
+                        }
+                    } else {
+                        if (top < 0 && bot < height) {
+                            recView.scrollToPosition(position);
+                        } else if (top > 0 && bot > height) {
+                            if (layoutManager != null) {
+                                layoutManager.scrollToPositionWithOffset(position, height-size);
+                            }
+                        }
+                    }
+                }
+            }
+        }, 100);
     }
 
 
@@ -436,6 +470,7 @@ public class ActionManager {
 
         final EditText editText = contentView.findViewById(R.id.setting_date_format);
         editText.setText(PrefUtil.dateFormat);
+        editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
         AlertDialog dialog = new AlertDialog.Builder(context)
                 .setView(contentView)

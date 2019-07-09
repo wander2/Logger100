@@ -112,7 +112,8 @@ public class TimeUtil {
         final int year = each[0];
         final int month = each[1];
         final int days = each[2];
-        return year + "-" + month + "-" + days;
+        final int week = each[3];
+        return year + "-" + month + "-" + days + " " + df_week_short[week].toUpperCase();
     }
 
     private static int getWeek(int days) {

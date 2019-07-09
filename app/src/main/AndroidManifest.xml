@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme">
 
-        <!--싱글인스턴스, 포트레이트, 스테이트비저블-->
+        <!--싱글인스턴스, 스테이트비저블-->
+        <!-- todo: portrait -> default -->
         <activity
             android:name=".component.MainActivity"
             android:launchMode="singleInstance"
