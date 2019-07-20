@@ -11,13 +11,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme">
 
-        <!--싱글인스턴스, 스테이트비저블-->
+        <!--싱글인스턴스, 스테이트비저블
+            android:screenOrientation="portrait"-->
         <!-- todo: portrait -> default -->
         <activity
             android:name=".component.MainActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible">
+            android:windowSoftInputMode="stateVisible"
+            android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

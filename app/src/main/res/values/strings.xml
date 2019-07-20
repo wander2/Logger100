@@ -117,10 +117,10 @@
     {wf} = from    {wt} = to
     -->
 
-    <string name="help_predict_keypad">"* This setting helps app starting smoother.\n* Warning) It may not work properly under certain circumstances."</string>
+    <string name="help_predict_keypad">"* Keypad prediction helps app start smoother.\n* It may not work properly under certain circumstances."</string>
     <!--
-    * This setting helps app starting smoother.
-    * Warning) It may not work properly under certain circumstances.
+    * Keypad prediction helps app start smoother.
+    * It may not work properly under certain circumstances.
     -->
 
 </resources>

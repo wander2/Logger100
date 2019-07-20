@@ -14,17 +14,14 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,32 +34,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import park.haneol.project.logger.R;
+import park.haneol.project.logger.component.MainActivity;
 import park.haneol.project.logger.item.BaseItem;
 import park.haneol.project.logger.item.DateItem;
 import park.haneol.project.logger.item.LogItem;
-import park.haneol.project.logger.recyclerview.DataAdapter;
-import park.haneol.project.logger.recyclerview.RecView;
-import park.haneol.project.logger.view.RootLayout;
 
 public class ActionManager {
 
-    private Context context;
+    public EditText editDialogView;
+    public int editPosition = -1;
 
-    private RootLayout rootLayout;
-    private RecView recView;
-    private EditText editText;
-    private ImageButton undoButton;
+    private MainActivity main;
+    private PopupMenuManager popupMenuManager;
 
-    private DataAdapter adapter;
-    private Database database;
-
-    private PopupMenu popupMenu;
-
-    private boolean undoDateRemoved;
-    private int undoPosition;
-    private LogItem undoItem;
-
-    private ThemeAnimation themeAnimation;
+    private UndoItem undoItem = new UndoItem();
+    private ThemeAnimation themeAnimation = new ThemeAnimation();
 
     private static List<Integer> UTC_INT = Arrays.asList(
             -720, -660, -600, -570, -540, -480, -420, -360,
@@ -84,346 +70,106 @@ public class ActionManager {
             "UTC +10:30", "UTC +11", "UTC +11:30", "UTC +12",
             "UTC +12:45", "UTC +13", "UTC +13:45", "UTC +14"};
 
-    public ActionManager(RootLayout rootLayout, Database database) {
-        this.context = rootLayout.getContext();
-        this.rootLayout = rootLayout;
-        this.recView = rootLayout.findViewById(R.id.rec_view);
-        this.editText = rootLayout.findViewById(R.id.edit_text);
-        ImageButton menuButton = rootLayout.findViewById(R.id.menu_button);
-        ImageButton themeButton = rootLayout.findViewById(R.id.theme_button);
-        this.undoButton = rootLayout.findViewById(R.id.undo_button);
-        this.adapter = (DataAdapter) recView.getAdapter();
-        this.database = database;
-        this.themeAnimation = new ThemeAnimation(rootLayout, recView, editText, menuButton, themeButton, undoButton);
+    public ActionManager(MainActivity main) {
+        this.main = main;
+        this.popupMenuManager = new PopupMenuManager(main);
     }
 
-
-
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onClickLogItem(final int position, View anchor) {
-        final LogItem item = (LogItem) adapter.getItemAt(position);
-        if (item == null) {
-            return;
-        }
-        final int ID_EDIT = 1;
-        final int ID_REMOVE = 2;
-        clearPopupMenu();
-        popupMenu = new PopupMenu(context, anchor);
-        popupMenu.getMenu().add(0, ID_EDIT, ID_EDIT, R.string.edit);
-        popupMenu.getMenu().add(0, ID_REMOVE, ID_REMOVE, R.string.remove);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        int[] titleRes = {
+                R.string.edit,
+                R.string.remove
+        };
+        popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case ID_EDIT:
-                        onClickEdit(item, position);
+                    case 0:
+                        onClickEdit(position);
                         return true;
-                    case ID_REMOVE:
-                        onClickRemove(item, position);
+                    case 1:
+                        onClickRemove(position);
                         return true;
                 }
                 return false;
             }
         });
-        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-            @Override
-            public void onDismiss(PopupMenu menu) {
-                popupMenu = null;
-            }
-        });
-        popupMenu.show();
     }
 
-    private void onClickEdit(final LogItem item, final int position) {
-        final boolean keypadShown = UIUtil.keypadShown;
-
-        // Make Content View
-        final EditText popupEditText = new EditText(context);
-        popupEditText.setText(item.getText());
-        popupEditText.setSelection(item.getText().length());
-        popupEditText.requestFocus();
-        popupEditText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
-
-        // Make Dialog
-        AlertDialog dialog = new AlertDialog.Builder(context)
-                .setTitle(R.string.edit)
-                .setView(popupEditText)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (!keypadShown) {
-                            UIUtil.hideSoftInput(popupEditText);
-                        }
-                    }
-                })
-                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 작동 조건
-                        String text = popupEditText.getText().toString();
-                        if (text.length() > 0) {
-                            onEditConfirm(item, position, text);
-                        }
-                        if (!keypadShown) {
-                            UIUtil.hideSoftInput(popupEditText);
-                        }
-                    }
-                })
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        UIUtil.isPopupEditing = false;
-                    }
-                })
-                .create();
-        dialog.setCanceledOnTouchOutside(false);
-
-        // 키패드 올리기
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        }
-
-        dialog.show();
-        UIUtil.isPopupEditing = true;
-    }
-
-    private void onClickRemove(LogItem item, int position) {
-        undoDateRemoved = adapter.removeItem(position);
-        undoPosition = position;
-        undoItem = item;
-        database.delete(item.getId());
-        undoButton.setVisibility(View.VISIBLE);
-    }
-
-    private void onEditConfirm(LogItem item, final int position, String text) {
-        item.setText(text);
-        adapter.notifyItemChanged(position);
-        database.updateText(item.getId(), text);
-        recView.startBlinkAnimation(position);
-
-        // 수정 후 화면 밖으로 나가는 문제 해결
-        recView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                RecyclerView.ViewHolder holder = recView.findViewHolderForAdapterPosition(position);
-                if (holder != null) {
-                    int top = holder.itemView.getTop();
-                    int bot = holder.itemView.getBottom();
-                    int size = holder.itemView.getHeight();
-                    int height = recView.getHeight();
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) recView.getLayoutManager();
-                    if (size > height) {
-                        if (top < 0 && bot < height) {
-                            if (layoutManager != null) {
-                                layoutManager.scrollToPositionWithOffset(position, height-size);
-                            }
-                        } else if (top > 0 && bot > height) {
-                            recView.scrollToPosition(position);
-                        }
-                    } else {
-                        if (top < 0 && bot < height) {
-                            recView.scrollToPosition(position);
-                        } else if (top > 0 && bot > height) {
-                            if (layoutManager != null) {
-                                layoutManager.scrollToPositionWithOffset(position, height-size);
-                            }
-                        }
-                    }
-                }
-            }
-        }, 100);
-    }
-
-
-
-
-
-
-
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onLongClickLogItem(final int position, View anchor) {
-        final LogItem item = (LogItem) adapter.getItemAt(position);
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
         if (item == null) {
             return;
         }
-        final int ID_HIGHLIGHT = 1;
-        final int ID_COPY = 2;
-        final int ID_SHARE = 3;
-        clearPopupMenu();
-        Context wrapper = new ContextThemeWrapper(context, R.style.DarkPopupMenuTheme);
-        popupMenu = new PopupMenu(wrapper, anchor);
-        popupMenu.getMenu().add(0, ID_COPY, ID_COPY, R.string.copy);
-        popupMenu.getMenu().add(0, ID_SHARE, ID_SHARE, R.string.share);
-        popupMenu.getMenu().add(0, ID_HIGHLIGHT, ID_HIGHLIGHT, item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        int[] titleRes = {
+                R.string.copy,
+                R.string.share,
+                item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight
+        };
+        popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case ID_COPY:
-                        onClickCopy(item.getText());
+                    case 0:
+                        copy(item.getText());
                         return true;
-                    case ID_SHARE:
-                        onClickShare(item.getText());
+                    case 1:
+                        share(item.getText());
                         return true;
-                    case ID_HIGHLIGHT:
-                        onClickHighlight(item, position);
+                    case 2:
+                        onClickHighlight(position);
                         return true;
                 }
                 return false;
             }
         });
-        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-            @Override
-            public void onDismiss(PopupMenu menu) {
-                popupMenu = null;
-            }
-        });
-        popupMenu.show();
     }
 
-    private void onClickCopy(String text) {
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null) {
-            ClipData clip = ClipData.newPlainText("content", text);
-            clipboard.setPrimaryClip(clip);
-            Toast.makeText(context, context.getString(R.string.copy_message), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void onClickShare(String text) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, text);
-        context.startActivity(Intent.createChooser(intent, "공유하기"));
-    }
-
-    private void onClickHighlight(LogItem item, int position) {
-        item.setFlag(item.getFlag() == 1 ? 0 : 1);
-        adapter.notifyItemChanged(position);
-        database.updateFlag(item.getId(), item.getFlag());
-    }
-
-
-
-
-
-
-
-
-
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onLongClickDateItem(final int position, View anchor) {
-        final DateItem item = (DateItem) adapter.getItemAt(position);
+        final DateItem item = (DateItem) main.mAdapter.getItemAt(position);
         if (item == null) {
             return;
         }
-        final int ID_REMOVE = 1;
-        final int ID_COPY = 2;
-        final int ID_SHARE = 3;
-        clearPopupMenu();
-        Context wrapper = new ContextThemeWrapper(context, R.style.DarkPopupMenuTheme);
-        popupMenu = new PopupMenu(wrapper, anchor);
-        popupMenu.getMenu().add(0, ID_REMOVE, ID_REMOVE, R.string.remove);
-        popupMenu.getMenu().add(0, ID_COPY, ID_COPY, R.string.copy);
-        popupMenu.getMenu().add(0, ID_SHARE, ID_SHARE, R.string.share);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        int[] titleRes = {
+                R.string.copy,
+                R.string.share,
+                R.string.remove
+        };
+        popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case ID_REMOVE:
+                    case 0:
+                        copy(getDateSpan(item, position + 1));
+                        return true;
+                    case 1:
+                        share(getDateSpan(item, position + 1));
+                        return true;
+                    case 2:
                         onClickDateRemove(position);
-                        return true;
-                    case ID_COPY:
-                        onClickCopy(getDateSpan(item, position + 1));
-                        return true;
-                    case ID_SHARE:
-                        onClickShare(getDateSpan(item, position + 1));
                         return true;
                 }
                 return false;
             }
         });
-        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-            @Override
-            public void onDismiss(PopupMenu menu) {
-                popupMenu = null;
-            }
-        });
-        popupMenu.show();
     }
 
-    private void onClickDateRemove(final int position) {
-        AlertDialog dialog = new AlertDialog.Builder(context)
-                .setTitle(R.string.remove)
-                .setMessage(context.getString(R.string.remove_date_message))
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ArrayList<Integer> idList = adapter.removeDate(position);
-                        database.deleteSpan(idList);
-                        clearUndoButton();
-                    }
-                })
-                .create();
-        dialog.show();
-    }
-
-    private String getDateSpan(DateItem dateItem, int position) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(dateItem.getDateString());
-        BaseItem item;
-        while (true) {
-            item = adapter.getItemAt(position);
-            if (!(item instanceof LogItem)) {
-                break;
-            }
-            sb.append("\r\n");
-            sb.append(((LogItem) item).getTimeString());
-            sb.append(((LogItem) item).getText().replace("\n", "\r\n      "));
-            position++;
-        }
-        return sb.toString();
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public void onClickSaveButton() {
-        LogItem item = null;
-        String text = editText.getText().toString();
-        if (text.length() > 0) {
-            item = database.insert(text);
-            adapter.addItem(item);
-            editText.getText().clear();
-        }
-        recView.scrollDown();
-        if (undoItem != null && item != null) {
-            if (undoItem.getId() == item.getId()) {
-                clearUndoButton();
-            }
-        }
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onClickMenu(View anchor) {
-        clearPopupMenu();
-        popupMenu = new PopupMenu(context, anchor);
-        popupMenu.getMenu().add(0, 0, 0, R.string.setting);
-        popupMenu.getMenu().add(0, 1, 1, R.string.backup);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        int[] titleRes = {
+                R.string.setting,
+                R.string.backup
+        };
+        popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
@@ -437,20 +183,128 @@ public class ActionManager {
                 return false;
             }
         });
-        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-            @Override
-            public void onDismiss(PopupMenu menu) {
-                popupMenu = null;
-            }
-        });
-        popupMenu.show();
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void onClickEdit(final int position) {
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
+        if (item == null) {
+            return;
+        }
+        final boolean keypadShown = UIUtil.keypadShown;
+
+        // Make Content View
+        editDialogView = new EditText(main);
+        editDialogView.setText(item.getText());
+        editDialogView.setSelection(item.getText().length());
+        editDialogView.requestFocus();
+        //contentView.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+
+        // Make Dialog
+        AlertDialog dialog = new AlertDialog.Builder(main)
+                .setTitle(R.string.edit)
+                .setView(editDialogView)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!keypadShown) {
+                            UIUtil.hideSoftInput(editDialogView);
+                            UIUtil.hideSoftInput(main.mEditText);
+                        }
+                    }
+                })
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 작동 조건
+                        String text = editDialogView.getText().toString();
+                        if (text.length() > 0) {
+                            onEditConfirm(item, position, text);
+                        }
+                        if (!keypadShown) {
+                            UIUtil.hideSoftInput(editDialogView);
+                            UIUtil.hideSoftInput(main.mEditText);
+                        }
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        UIUtil.isPopupEditing = false;
+                        editDialogView = null;
+                        editPosition = -1;
+                    }
+                })
+                .create();
+        dialog.setCanceledOnTouchOutside(false);
+
+        // 키패드 올리기
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+
+        dialog.show();
+        editPosition = position;
+        UIUtil.isPopupEditing = true;
+    }
+
+    private void onEditConfirm(LogItem item, final int position, String text) {
+        item.setText(text);
+        main.mAdapter.notifyItemChanged(position);
+        main.mDatabase.updateText(item.getId(), text);
+        main.mRecView.startBlinkAnimation(position);
+
+        // 수정 후 화면 밖으로 나가는 문제 해결
+        main.mRecView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                RecyclerView.ViewHolder holder = main.mRecView.findViewHolderForAdapterPosition(position);
+                if (holder != null) {
+                    int top = holder.itemView.getTop();
+                    int bot = holder.itemView.getBottom();
+                    int size = holder.itemView.getHeight();
+                    int height = main.mRecView.getHeight();
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) main.mRecView.getLayoutManager();
+                    if (layoutManager != null) {
+                        if (size > height) {
+                            if (top < 0 && bot < height) {
+                                layoutManager.scrollToPositionWithOffset(position, height/2-size);
+                            } else if (top > 0 && bot > height) {
+                                layoutManager.scrollToPositionWithOffset(position, height/2);
+                            }
+                        } else {
+                            if (top < 0 || bot > height) {
+                                layoutManager.scrollToPositionWithOffset(position, (height-size)/2);
+                            }
+                        }
+                    }
+                }
+            }
+        }, 100);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private void onClickSetting() {
-        final View contentView = LayoutInflater.from(context).inflate(R.layout.setting_layout, rootLayout, false);
+        final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout, main.mRootLayout, false);
 
         final Spinner spinner = contentView.findViewById(R.id.setting_timezone_spinner);
-        ArrayAdapter<CharSequence> spinnerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, UTC_STRING);
+        ArrayAdapter<CharSequence> spinnerAdapter = new ArrayAdapter<>(main, android.R.layout.simple_spinner_item, UTC_STRING);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
         spinner.setSelection(UTC_INT.indexOf(PrefUtil.timeZoneOffset));
@@ -470,9 +324,9 @@ public class ActionManager {
 
         final EditText editText = contentView.findViewById(R.id.setting_date_format);
         editText.setText(PrefUtil.dateFormat);
-        editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+        //editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
+        AlertDialog dialog = new AlertDialog.Builder(main)
                 .setView(contentView)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
@@ -480,18 +334,18 @@ public class ActionManager {
                     public void onClick(DialogInterface dialog, int which) {
                         if (Build.VERSION.SDK_INT >= 19) {
                             CheckBox checkBox = contentView.findViewById(R.id.setting_allow_keypad_prediction);
-                            PrefUtil.setOnStartKeypad(context, checkBox.isChecked());
+                            PrefUtil.setOnStartKeypad(main, checkBox.isChecked());
                         }
 
                         if (!editText.getText().toString().equals(PrefUtil.dateFormat)) {
-                            PrefUtil.setDateFormat(context, editText.getText().toString());
-                            adapter.notifyDataSetChanged();
+                            PrefUtil.setDateFormat(main, editText.getText().toString());
+                            main.mAdapter.notifyDataSetChanged();
                         }
 
                         int offset = UTC_INT.get(spinner.getSelectedItemPosition());
                         if (offset != PrefUtil.timeZoneOffset) {
-                            PrefUtil.setTimeOffset(context, offset);
-                            adapter.setItemList(database.load());
+                            PrefUtil.setTimeOffset(main, offset);
+                            main.mAdapter.setItemList(main.mDatabase.load());
                         }
                     }
                 })
@@ -506,11 +360,13 @@ public class ActionManager {
         UIUtil.isPopupEditing = true;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private void onClickBackup() {
-        final String path = context.getString(R.string.app_name) + " (" + TimeUtil.getDefaultDateFormat(TimeUtil.getCurrentTime()) + ").txt";
-        AlertDialog dialog = new AlertDialog.Builder(context)
+        final String path = main.getString(R.string.app_name) + " (" + TimeUtil.getDefaultDateFormat(TimeUtil.getCurrentTime()) + ").txt";
+        AlertDialog dialog = new AlertDialog.Builder(main)
                 .setTitle(R.string.backup)
-                .setMessage(context.getString(R.string.backup_message))
+                .setMessage(main.getString(R.string.backup_message))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -522,49 +378,149 @@ public class ActionManager {
         dialog.show();
     }
 
-    public void onClickTheme() {
-        PrefUtil.toggleThemeColorNumber(context);
-        ColorUtil.themeToggled(context);
-        themeAnimation.interStart = ColorUtil.currentInter;
-        rootLayout.startAnimation(themeAnimation);
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void onClickRemove(int position) {
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
+        if (item == null) {
+            return;
+        }
+        undoItem.set(main.mAdapter.removeItem(position), position, item);
+        main.mDatabase.delete(item.getId());
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void onClickHighlight(int position) {
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
+        if (item == null) {
+            return;
+        }
+        item.setFlag(item.getFlag() == 1 ? 0 : 1);
+        main.mAdapter.notifyItemChanged(position);
+        main.mDatabase.updateFlag(item.getId(), item.getFlag());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void onClickDateRemove(final int position) {
+        AlertDialog dialog = new AlertDialog.Builder(main)
+                .setTitle(R.string.remove)
+                .setMessage(main.getString(R.string.remove_date_message))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ArrayList<Integer> idList = main.mAdapter.removeDate(position);
+                        main.mDatabase.deleteSpan(idList);
+                        undoItem.clear();
+                    }
+                })
+                .create();
+        dialog.show();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void onClickSaveButton() {
+        LogItem item = null;
+        String text = main.mEditText.getText().toString();
+        if (text.length() > 0) {
+            item = main.mDatabase.insert(text);
+            main.mAdapter.addItem(item);
+            main.mEditText.getText().clear();
+        }
+        main.mRecView.scrollDown();
+        if (undoItem.exist() && item != null) {
+            if (undoItem.item.getId() == item.getId()) {
+                undoItem.clear();
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onClickUndo() {
-        clearUndoButton();
-        if (undoItem != null) {
-            adapter.addItemAt(undoItem, undoPosition, undoDateRemoved);
-            database.insertOfItem(undoItem);
-            recView.scrollToItemPosition(undoPosition);
-            undoItem = null;
-            undoPosition = -1;
-            undoDateRemoved = false;
+        if (undoItem.exist()) {
+            main.mAdapter.addItemAt(undoItem.item, undoItem.position, undoItem.dateRemoved);
+            main.mDatabase.insertOfItem(undoItem.item);
+            main.mRecView.scrollToItemPosition(undoItem.position);
+            undoItem.clear();
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
 
-    private void clearPopupMenu() {
-        if (popupMenu != null) {
-            popupMenu.dismiss();
-            popupMenu = null;
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private String getDateSpan(DateItem dateItem, int position) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dateItem.getDateString());
+        BaseItem item;
+        while (true) {
+            item = main.mAdapter.getItemAt(position);
+            if (!(item instanceof LogItem)) {
+                break;
+            }
+            sb.append("\r\n");
+            sb.append(((LogItem) item).getTimeString());
+            sb.append(((LogItem) item).getText().replace("\n", "\r\n      "));
+            position++;
         }
+        return sb.toString();
     }
 
-    private void clearUndoButton() {
-        undoButton.setVisibility(View.GONE);
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void onClickTheme() {
+        PrefUtil.toggleThemeColorNumber(main);
+        ColorUtil.themeToggled(main);
+        themeAnimation.interStart = ColorUtil.currentInter;
+        main.mRootLayout.startAnimation(themeAnimation);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void exportFullBackupFile(String path) {
-        File file = new File(context.getCacheDir(), path);
+        File file = new File(main.getCacheDir(), path);
         try {
             FileWriter writer = new FileWriter(file);
             writer.append(TimeUtil.getUTC());
-            for (int position = 1; position < adapter.getItemCount(); position++) {
-                BaseItem item = adapter.getItemAt(position);
+            for (int position = 1; position < main.mAdapter.getItemCount(); position++) {
+                BaseItem item = main.mAdapter.getItemAt(position);
                 if (item instanceof DateItem) {
                     writer.append("\r\n     ");
                     writer.append(((DateItem) item).getDateFormat());
@@ -581,37 +537,80 @@ public class ActionManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Uri uri = FileProvider.getUriForFile(context, context.getPackageName()+".provider", file);
+        Uri uri = FileProvider.getUriForFile(main, main.getPackageName()+".provider", file);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/txt");
         intent.putExtra(Intent.EXTRA_STREAM, uri);
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.backup)));
+        main.startActivity(Intent.createChooser(intent, main.getString(R.string.backup)));
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void copy(String text) {
+        ClipboardManager clipboard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null) {
+            ClipData clip = ClipData.newPlainText("content", text);
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(main, main.getString(R.string.copy_message), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void share(String text) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        main.startActivity(Intent.createChooser(intent, "공유하기"));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private class ThemeAnimation extends Animation implements Animation.AnimationListener {
 
-        private RootLayout rootLayout;
-        private EditText editText;
-        private RecView recView;
-        private ImageButton menuButton;
-        private ImageButton themeButton;
-        private ImageButton undoButton;
-
         private float interStart;
 
-        ThemeAnimation(RootLayout rootLayout, RecView recView, EditText editText,
-                       ImageButton menuButton, ImageButton themeButton, ImageButton undoButton) {
-            this.rootLayout = rootLayout;
-            this.recView = recView;
-            this.editText = editText;
-            this.menuButton = menuButton;
-            this.themeButton = themeButton;
-            this.undoButton = undoButton;
+        ThemeAnimation() {
             setDuration(200);
             setInterpolator(new LinearInterpolator());
             setAnimationListener(this);
@@ -623,12 +622,12 @@ public class ActionManager {
         @Override
         protected void applyTransformation(float t, Transformation transformation) {
             ColorUtil.applyInter(getInter(t));
-            ColorUtil.applyColor(rootLayout, recView, editText, menuButton, themeButton, undoButton);
+            ColorUtil.applyColor(main);
         }
 
         @Override
         public void onAnimationEnd(Animation animation) {
-            adapter.notifyDataSetChanged();
+            main.mAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -638,4 +637,30 @@ public class ActionManager {
             return interStart + (t * ((float) PrefUtil.themeNumber - interStart));
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class UndoItem {
+        boolean dateRemoved;
+        int position;
+        LogItem item = null;
+        void set(boolean dateRemoved, int position, LogItem item) {
+            this.dateRemoved = dateRemoved;
+            this.position = position;
+            this.item = item;
+            main.mUndoButton.setVisibility(View.VISIBLE);
+        }
+        void clear() {
+            main.mUndoButton.setVisibility(View.GONE);
+            this.item = null;
+        }
+        boolean exist() {
+            return item != null;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
 }

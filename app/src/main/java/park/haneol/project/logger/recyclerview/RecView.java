@@ -17,8 +17,9 @@ import park.haneol.project.logger.util.ColorUtil;
 
 public class RecView extends RecyclerView {
 
-    private DataAdapter adapter;
-    private DataLayoutManager layoutManager;
+    public DataAdapter adapter;
+    public DataLayoutManager layoutManager;
+
     private BlinkAnimation blinkAnimation = new BlinkAnimation();
 
     public RecView(@NonNull Context context) {
@@ -71,6 +72,15 @@ public class RecView extends RecyclerView {
         }
     }
 
+    public void startBlinkAnimation(final int position) {
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                blinkAnimation.start(position);
+            }
+        }, blinkAnimation.DELAY);
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (!canScrollVertically(1)) {
@@ -88,7 +98,9 @@ public class RecView extends RecyclerView {
 
 
 
-    private class DataLayoutManager extends LinearLayoutManager {
+
+
+    public class DataLayoutManager extends LinearLayoutManager {
 
         DataLayoutManager(Context context, AttributeSet attrs, int defStyle) {
             super(context, attrs, defStyle, 0);
@@ -100,28 +112,6 @@ public class RecView extends RecyclerView {
         }
 
     }
-
-
-
-
-
-
-
-
-
-    public void startBlinkAnimation(final int position) {
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                blinkAnimation.start(position);
-            }
-        }, blinkAnimation.DELAY);
-    }
-
-
-
-
-
 
     private class BlinkAnimation extends Animation implements Animation.AnimationListener {
 
@@ -179,5 +169,6 @@ public class RecView extends RecyclerView {
         @Override
         public void onAnimationRepeat(Animation animation) {}
     }
+
 
 }

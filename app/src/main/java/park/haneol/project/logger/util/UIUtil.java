@@ -1,5 +1,6 @@
 package park.haneol.project.logger.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -98,6 +99,11 @@ public class UIUtil {
 
     private static boolean isHardwareKeyboard(Context context) {
         return context.getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS;
+    }
+
+    public static boolean isLandscape(Activity activity) {
+        Configuration newConfig = activity.getResources().getConfiguration();
+        return newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
 }

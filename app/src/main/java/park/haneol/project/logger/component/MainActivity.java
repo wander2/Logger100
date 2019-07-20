@@ -25,26 +25,41 @@ import park.haneol.project.logger.util.TimeUtil;
 import park.haneol.project.logger.util.UIUtil;
 import park.haneol.project.logger.view.RootLayout;
 
-// todo later: 알림 클릭으로 시작되었을 때는 키보드 안 띄움
-
 public class MainActivity extends AppCompatActivity {
 
-    private RootLayout rootLayout;
-    private RecView recView;
-    private EditText editText;
+    private static final String RESTORE_SCROLL_POSITION = "restore_scroll_position";
+    private static final String RESTORE_SCROLL_OFFSET = "restore_scroll_offset";
+    private static final String RESTORE_EDIT_POSITION = "restore_edit_position";
+    private static final String RESTORE_EDIT_DIALOG_TEXT = "restore_edit_dialog_text";
+    private static final String RESTORE_EDIT_DIALOG_SELECTION = "restore_edit_dialog_selection";
 
-    private Database database;
-    private DataAdapter adapter;
+    public RootLayout mRootLayout;
+    public RecView mRecView;
+    public EditText mEditText;
+    public Button mSaveButton;
+    public ImageButton mMenuButton;
+    public ImageButton mThemeButton;
+    public ImageButton mUndoButton;
 
-    private ActionManager actionManager;
+    public Database mDatabase;
+    public DataAdapter mAdapter;
+
+    public ActionManager mActionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        UIUtil.fitCount = 0;
-        UIUtil.keypadShown = true;
+        if (!UIUtil.isLandscape(this)) {
+            UIUtil.fitCount = 0;
+            UIUtil.keypadShown = true;
+        }
+        if (UIUtil.isLandscape(this)) {
+            UIUtil.keypadShown = false;
+            UIUtil.fitCount = 2;
+        }
 
+        // apply before widget initialize
         if (Build.VERSION.SDK_INT >= 19) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
@@ -52,94 +67,129 @@ public class MainActivity extends AppCompatActivity {
         TimeUtil.init(this);
         ColorUtil.init(this);
 
-        rootLayout = findViewById(R.id.root_layout);
-        recView = findViewById(R.id.rec_view);
-        editText = findViewById(R.id.edit_text);
-        Button saveButton = findViewById(R.id.save_button);
-        ImageButton menuButton = findViewById(R.id.menu_button);
-        ImageButton themeButton = findViewById(R.id.theme_button);
-        ImageButton undoButton = findViewById(R.id.undo_button);
-        ColorUtil.applyColor(rootLayout, recView, editText, menuButton, themeButton, undoButton);
+        // widget initialize
+        mRootLayout = findViewById(R.id.root_layout);
+        mRecView = findViewById(R.id.rec_view);
+        mEditText = findViewById(R.id.edit_text);
+        mSaveButton = findViewById(R.id.save_button);
+        mMenuButton = findViewById(R.id.menu_button);
+        mThemeButton = findViewById(R.id.theme_button);
+        mUndoButton = findViewById(R.id.undo_button);
 
-        database = new Database(this);
-        adapter = (DataAdapter) recView.getAdapter();
-        adapter.setItemList(database.load());
+        // apply after widget initialize
+        ColorUtil.applyColor(this);
 
-        actionManager = new ActionManager(rootLayout, database);
-        adapter.setActionManager(actionManager);
+        mDatabase = new Database(this);
+        mAdapter = (DataAdapter) mRecView.getAdapter();
+        mAdapter.setItemList(mDatabase.load());
+
+        mActionManager = new ActionManager(this);
+        mAdapter.setActionManager(mActionManager);
 
         // 복원
         String textPres = PrefUtil.getTextPreserved(this);
-        editText.setText(textPres);
-        editText.setSelection(textPres.length());
+        mEditText.setText(textPres);
+        mEditText.setSelection(textPres.length());
         // 엔터 동작
-        editText.setOnKeyListener(new View.OnKeyListener() {
+        mEditText.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_INSERT) {
-                    actionManager.onClickSaveButton();
+                    mActionManager.onClickSaveButton();
                     return true;
                 }
                 return false;
             }
         });
 
-        saveButton.setOnClickListener(new View.OnClickListener() {
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                actionManager.onClickSaveButton();
+                mActionManager.onClickSaveButton();
             }
         });
-        menuButton.setOnClickListener(new View.OnClickListener() {
+        mMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                actionManager.onClickMenu(v);
+                mActionManager.onClickMenu(v);
             }
         });
-        themeButton.setOnClickListener(new View.OnClickListener() {
+        mThemeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                actionManager.onClickTheme();
+                mActionManager.onClickTheme();
             }
         });
-        undoButton.setOnClickListener(new View.OnClickListener() {
+        mUndoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                actionManager.onClickUndo();
+                mActionManager.onClickUndo();
             }
         });
 
         ActivityObserver.getInstance().setActivity(this);
 
-        // todo : 시작할 때 방향 감지
-        //android:configChanges="screenSize|orientation|screenLayout|navigation"
-        //onConfigurationChanged
-        //orientEventListener = new OrientationEventListener(this,
-        //                SensorManager.SENSOR_DELAY_NORMAL) {
-        /*
-        Configuration newConfig = getResources().getConfiguration();
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // landscape
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            // portrait
+        if (savedInstanceState != null) {
+            final int resPosition = savedInstanceState.getInt(RESTORE_SCROLL_POSITION);
+            final int resOffset = savedInstanceState.getInt(RESTORE_SCROLL_OFFSET);
+            mRecView.post(new Runnable() {
+                @Override
+                public void run() {
+                    mRecView.layoutManager.scrollToPositionWithOffset(resPosition, mRecView.getHeight()-resOffset);
+                }
+            });
+            int editPosition = savedInstanceState.getInt(RESTORE_EDIT_POSITION);
+            if (editPosition != -1) {
+                String editDialogText = savedInstanceState.getString(RESTORE_EDIT_DIALOG_TEXT);
+                int editDialogSelection = savedInstanceState.getInt(RESTORE_EDIT_DIALOG_SELECTION);
+                if (editDialogText != null) {
+                    mActionManager.onClickEdit(editPosition);
+                    mActionManager.editDialogView.setText(editDialogText);
+                    mActionManager.editDialogView.setSelection(editDialogSelection);
+                }
+            }
         }
-        */
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        UIUtil.keypadShown = false;
+        UIUtil.fitCount = 2;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int position = mRecView.layoutManager.findLastVisibleItemPosition();
+        outState.putInt(RESTORE_SCROLL_POSITION, position);
+        View view = mRecView.layoutManager.findViewByPosition(position);
+        if (view != null) {
+            outState.putInt(RESTORE_SCROLL_OFFSET, mRecView.getHeight()-view.getTop());
+        }
+        if (mActionManager.editDialogView != null) {
+            outState.putInt(RESTORE_EDIT_POSITION, mActionManager.editPosition);
+            outState.putString(RESTORE_EDIT_DIALOG_TEXT, mActionManager.editDialogView.getText().toString());
+            outState.putInt(RESTORE_EDIT_DIALOG_SELECTION, mActionManager.editDialogView.getSelectionEnd());
+        }
     }
 
     @Override
     protected void onStop() {
-        if (Build.VERSION.SDK_INT >= 24 && !UIUtil.isPopupEditing && UIUtil.keypadShown) {
-            UIUtil.fitCount = 0; // 초기화
+        if (!UIUtil.isLandscape(this)) {
+            if (Build.VERSION.SDK_INT >= 24 && !UIUtil.isPopupEditing && UIUtil.keypadShown) {
+                UIUtil.fitCount = 0; // 초기화
+            }
+            UIUtil.setKeypadShown(getWindow(), UIUtil.keypadShown);
+            UIUtil.predictMargin(mRootLayout, false);
         }
-        UIUtil.setKeypadShown(getWindow(), UIUtil.keypadShown);
-        UIUtil.predictMargin(rootLayout, false);
-        PrefUtil.setTextPreserved(this, editText.getText().toString());
+        PrefUtil.setTextPreserved(this, mEditText.getText().toString());
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        database.close();
+        mDatabase.close();
         super.onDestroy();
     }
 
@@ -155,21 +205,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestart() {
         if (UIUtil.fitCount == 0) {
             UIUtil.fitCount = 1;
-            UIUtil.predictMargin(rootLayout, false);
+            UIUtil.predictMargin(mRootLayout, false);
         }
         super.onRestart();
     }
 
     // 공유 받음
     void onTextShared(LogItem item) {
-        adapter.addItem(item);
-        recView.scrollToItemPosition(adapter.getItemCount() - 1);
+        mAdapter.addItem(item);
+        mRecView.scrollToItemPosition(mAdapter.getItemCount() - 1);
     }
 
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
-        UIUtil.predictMargin(rootLayout, false);
-        UIUtil.keypadShown = false;
+        if (!UIUtil.isLandscape(this)) {
+            UIUtil.predictMargin(mRootLayout, false);
+            UIUtil.keypadShown = false;
+        }
     }
+
 }

@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ImageButton;
 
 import park.haneol.project.logger.R;
-import park.haneol.project.logger.recyclerview.RecView;
-import park.haneol.project.logger.view.RootLayout;
+import park.haneol.project.logger.component.MainActivity;
 
 public class ColorUtil {
 
@@ -30,13 +27,13 @@ public class ColorUtil {
     private static int white_colorHighlight;
     private static int[] WHITE_WEEK_COLOR = new int[7];
 
-    private static int colorBackground;  // rootLayout
-    private static int colorWB; // editText - text, imageButton - tint
+    private static int colorBackground;  // mRootLayout
+    private static int colorWB; // mEditText - text, imageButton - tint
     public static int colorBW; // log highlight - text
     public static int colorTime; // time, date - text
     public static int colorLog; // log - text
     public static int colorHighlight; // log highlight - background
-    public static int[] WEEK_COLOR = new int[7];
+    static int[] WEEK_COLOR = new int[7];
 
     public static void init(Activity activity) {
         Resources res = activity.getResources();
@@ -98,16 +95,15 @@ public class ColorUtil {
         }
     }
 
-    public static void applyColor(RootLayout rootLayout, RecView recView, EditText editText,
-                                  ImageButton menuButton, ImageButton themeButton, ImageButton undoButton) {
-        rootLayout.setBackgroundColor(colorBackground);
-        editText.setTextColor(colorWB);
-        if (recView.getAdapter() != null) {
-            recView.getAdapter().notifyDataSetChanged();
+    public static void applyColor(MainActivity mainActivity) {
+        mainActivity.mRootLayout.setBackgroundColor(colorBackground);
+        mainActivity.mEditText.setTextColor(colorWB);
+        if (mainActivity.mRecView.getAdapter() != null) {
+            mainActivity.mRecView.getAdapter().notifyDataSetChanged();
         }
-        menuButton.setColorFilter(colorWB, android.graphics.PorterDuff.Mode.MULTIPLY);
-        themeButton.setColorFilter(colorWB, android.graphics.PorterDuff.Mode.MULTIPLY);
-        undoButton.setColorFilter(colorWB, android.graphics.PorterDuff.Mode.MULTIPLY);
+        mainActivity.mMenuButton.setColorFilter(colorWB, android.graphics.PorterDuff.Mode.MULTIPLY);
+        mainActivity.mThemeButton.setColorFilter(colorWB, android.graphics.PorterDuff.Mode.MULTIPLY);
+        mainActivity.mUndoButton.setColorFilter(colorWB, android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
     private static int getInterColor(int colorWhite, int colorBlack, float inter) {
