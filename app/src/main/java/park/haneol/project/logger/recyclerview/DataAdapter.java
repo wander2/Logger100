@@ -17,6 +17,7 @@ import park.haneol.project.logger.holder.LogHolder;
 import park.haneol.project.logger.holder.SpaceHolder;
 import park.haneol.project.logger.item.BaseItem;
 import park.haneol.project.logger.item.DateItem;
+import park.haneol.project.logger.item.ItemList;
 import park.haneol.project.logger.item.LogItem;
 import park.haneol.project.logger.util.ActionManager;
 
@@ -27,8 +28,12 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
     private static final int TYPE_SPACE = 3;
 
     private Context context;
-    private ArrayList<BaseItem> itemList;
+    private ItemList bItemList;
+    private ItemList itemList;
     private ActionManager actionManager;
+
+    private String searchString;
+    private int focusPosition;
 
     DataAdapter(Context context) {
         setHasStableIds(true);
@@ -39,16 +44,62 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
         this.actionManager = actionManager;
     }
 
-    public void setItemList(ArrayList<BaseItem> itemList) {
-        this.itemList = itemList;
+    public void setItemList(ItemList itemList) {
+        this.bItemList = itemList;
+    }
+
+    // 표시용 리스트를 어떻게 처리할지 결정, onCreate, 시간대 재설정시 호출됨
+    public void update(boolean isSearchMode) {
+        if (isSearchMode) {
+            // 검색 모드일 때 (onCreate 에서 처음 호출될 때는 searchString == null 이다. 즉 아무것도 안함)
+            if (searchString != null) {
+                search(searchString); // 시간대 재설정시 한 번 더 검색을 실행한다.
+            }
+        } else {
+            // 일반 모드일 때
+            itemList = bItemList;
+            notifyDataSetChanged();
+        }
+    }
+
+    // 검색모드 진입할 때 (onCreate -> search), 인풋이 바뀔 때 실행됨
+    public void search(String searchString) {
+        if (bItemList == null) {
+            return;
+        }
+
+        this.searchString = searchString.toLowerCase();
+        // 검색 내용이 ""일 경우 일반모드와 동일
+        if (searchString.length() == 0) {
+            itemList = bItemList;
+            notifyDataSetChanged();
+            return;
+        }
+
+        // 아이템 리스트 초기화 null: 처음, bItemList: search() 이전 상태가 전체 포커스인 경우
+        // itemList 가 bItemList 와 다를 경우 : 유효 검색이 실행중인 상황
+        if (itemList == null || itemList == bItemList) {
+            itemList = new ItemList();
+        } else {
+            itemList.clear();
+        }
+
+        // 필터링
+        itemList.filterFrom(bItemList, searchString);
+
+        // 변경사항 적용
         notifyDataSetChanged();
     }
 
-    public BaseItem getItemAt(int position) {
-        if (position >= 0 && position < itemList.size()) {
-            return itemList.get(position);
+    public int searchNext() {
+        if (itemList != bItemList) {
+            int lastId = itemList.getLastItem().getId();
+            focusPosition = bItemList.getPositionById(lastId);
+            itemList = bItemList;
+            return focusPosition;
         }
-        return new BaseItem();
+        focusPosition = itemList.getNextSearchPosition(focusPosition, searchString);
+        return focusPosition;
     }
 
     @Override
@@ -61,7 +112,7 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        BaseItem item = getItemAt(position);
+        BaseItem item = itemList.getItemAt(position);
         if (item instanceof LogItem) {
             return TYPE_LOG;
         } else if (item instanceof DateItem) {
@@ -87,81 +138,105 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull BaseHolder holder, int position) {
-        holder.setItem(getItemAt(position));
+        BaseItem item = itemList.getItemAt(position);
+        holder.setItem(item);
         holder.applyFontSize();
         holder.applyColor();
+
+        // itemList != bItemList 는 다음 검색 기능 때 작용하지 않기 때문에 다른 방법 사용
+        if (searchString != null && searchString.length() != 0) {
+            if (item instanceof LogItem && holder instanceof LogHolder) {
+                ((LogHolder) holder).setItemInSearchMode((LogItem) item, searchString);
+            }
+        }
     }
 
     @Override
     public long getItemId(int position) {
-        return getItemAt(position).getId();
+        return itemList.getItemAt(position).getId();
     }
 
     public void addItem(LogItem item) {
-        BaseItem lastItem = getItemAt(itemList.size() - 1);
         int position = itemList.size();
-        if (!(lastItem instanceof LogItem && item.getDays() == ((LogItem) lastItem).getDays())) {
-            itemList.add(new DateItem(item.getTime()));
-            itemList.add(item);
+        boolean isDateAdded = itemList.addItem(item);
+        if (isDateAdded) {
             notifyItemRangeInserted(position, 2);
         } else {
-            itemList.add(item);
             notifyItemInserted(position);
         }
     }
 
-
-
-    public void addItemAt(LogItem item, int position, boolean dateRemoved) {
-        if (dateRemoved) {
-            itemList.add(position - 1, new DateItem(item.getTime()));
-            itemList.add(position, item);
-            notifyItemRangeInserted(position - 1, 2);
+    // return : blink position
+    public int restoreItem(LogItem item) {
+        int position;
+        int rPosI = itemList.getRestorePosition(item);
+        if (rPosI >= itemList.size()) {
+            addItem(item);
+            position = itemList.size() - 1;
         } else {
-            itemList.add(position, item);
-            notifyItemInserted(position);
-        }
-    }
-
-
-
-    // return: date removed
-    public boolean removeItem(int position) {
-        BaseItem above = getItemAt(position - 1);
-        BaseItem below = getItemAt(position + 1);
-        if (above instanceof DateItem && !(below instanceof LogItem)) {
-            itemList.remove(position);
-            itemList.remove(position - 1);
-            notifyItemRangeRemoved(position - 1, 2);
-            return true;
-        } else {
-            itemList.remove(position);
-            notifyItemRemoved(position);
-            return false;
-        }
-    }
-
-
-    public ArrayList<Integer> removeDate(int position) {
-        if (!(getItemAt(position) instanceof DateItem)) {
-            return null;
-        }
-
-        itemList.remove(position);
-        BaseItem item;
-        ArrayList<Integer> idList = new ArrayList<>();
-        int count = 1;
-        while (true) {
-            item = getItemAt(position);
-            if (!(item instanceof LogItem)) {
-                break;
+            boolean isDateAdded = itemList.restoreItem(rPosI, item);
+            // 날짜가 추가되면 rPosI++
+            if (isDateAdded) {
+                notifyItemRangeInserted(rPosI, 2);
+                position = rPosI + 1;
+            } else {
+                notifyItemInserted(rPosI);
+                position = rPosI;
             }
-            idList.add(itemList.remove(position).getId());
-            count++;
         }
-        notifyItemRangeRemoved(position, count);
 
+        // 검색 상황일 때 원본 처리
+        if (itemList != bItemList) {
+            int rPosB = bItemList.getRestorePosition(item);
+            if (rPosB >= bItemList.size()) {
+                bItemList.addItem(item);
+            } else {
+                bItemList.restoreItem(rPosB, item);
+            }
+        }
+
+        // 강조할 위치 리턴
+        return position;
+    }
+
+    public void removeItem(int position) {
+        LogItem item = (LogItem) itemList.getItemAt(position);
+
+        // itemList 의 해당 position 위치 삭제 (위에 날짜 아이템 삭제해야 되면 그것도 삭제)
+        boolean isDateRemoved = itemList.removeItem(position);
+
+        // 날짜 아이템 삭제 여부 받아서 노티파이
+        if (isDateRemoved) {
+            notifyItemRangeRemoved(position - 1, 2);
+        } else {
+            notifyItemRemoved(position);
+        }
+
+        // 검색 상황일 때 원본 처리 (item1 활용)
+        if (itemList != bItemList) {
+            bItemList.removeItem(bItemList.getPositionById(item.getId()));
+        }
+    }
+
+    public ArrayList<Integer> getIdsInDate(int position) {
+        ArrayList<Integer> idList = new ArrayList<>();
+        position++;
+        while (itemList.getItemAt(position) instanceof LogItem) {
+            idList.add(itemList.getItemAt(position).getId());
+            position++;
+        }
         return idList;
     }
+
+    public void removeItems(ArrayList<Integer> idList) {
+        for (int id: idList) {
+            removeItem(itemList.getPositionById(id));
+        }
+    }
+
+    public BaseItem getItemAt(int position) {
+        return itemList.getItemAt(position);
+    }
+
 
 }

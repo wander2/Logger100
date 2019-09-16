@@ -12,6 +12,7 @@ import java.util.HashSet;
 import park.haneol.project.logger.R;
 import park.haneol.project.logger.item.BaseItem;
 import park.haneol.project.logger.item.DateItem;
+import park.haneol.project.logger.item.ItemList;
 import park.haneol.project.logger.item.LogItem;
 
 // 마지막 앱 버전 48
@@ -22,7 +23,7 @@ public class Database extends SQLiteOpenHelper {
     private Context context;
 
     private static final String DATABASE_NAME  = "logger.db";
-    private static final int DATABASE_VERSION  = 40;
+    private static final int DATABASE_VERSION  = 41;
 
     private static final String TABLE_LOG_LIST = "log_list";
     private static final String COL_LOG_ID     = "log_id";
@@ -52,6 +53,9 @@ public class Database extends SQLiteOpenHelper {
                     " ADD COLUMN " + COL_FLAG + " INTEGER DEFAULT 0");
             clearPrefData48(db);
         }
+        if (oldVersion < 41) {
+            insertNote(db, context.getString(R.string.patch_116));
+        }
     }
 
     private void insertHelp(SQLiteDatabase db, String[] stringArray) {
@@ -61,6 +65,13 @@ public class Database extends SQLiteOpenHelper {
             values.put(COL_LOG, text);
             db.insert(TABLE_LOG_LIST, null, values);
         }
+    }
+
+    private void insertNote(SQLiteDatabase db, String string) {
+        ContentValues values = new ContentValues();
+        values.put(COL_TIME, TimeUtil.getCurrentTime());
+        values.put(COL_LOG, string);
+        db.insert(TABLE_LOG_LIST, null, values);
     }
 
     private void clearPrefData48(SQLiteDatabase db) {
@@ -80,9 +91,9 @@ public class Database extends SQLiteOpenHelper {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public ArrayList<BaseItem> load() {
+    public ItemList load() {
         SQLiteDatabase db = getWritableDatabase();
-        ArrayList<BaseItem> itemList = new ArrayList<>();
+        ItemList itemList = new ItemList();
         itemList.add(new BaseItem()); // 맨 윗쪽 패딩용
         int days;
         int daysBefore = -1;
@@ -144,7 +155,7 @@ public class Database extends SQLiteOpenHelper {
         db.delete(TABLE_LOG_LIST, COL_LOG_ID + "=?", iArg(logId));
     }
 
-    void deleteSpan(ArrayList<Integer> idList) {
+    void deleteItems(ArrayList<Integer> idList) {
         SQLiteDatabase db = getWritableDatabase();
         for (Integer logId: idList) {
             db.delete(TABLE_LOG_LIST, COL_LOG_ID + "=?", iArg(logId));

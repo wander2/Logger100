@@ -7,6 +7,8 @@
     <color name="colorBackground">#222222</color>
     <color name="w_colorBackground">#ffffff</color>
 
+    <color name="colorSearchMode">#4caf50</color>
+
     <color name="SUN">#ff7070</color>
     <color name="MON">#5c9dff</color>
     <color name="TUE">#ffb060</color>

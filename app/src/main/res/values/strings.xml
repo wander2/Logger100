@@ -23,7 +23,7 @@
     <string name="copy_message">Copied to clipboard.</string>
     <string name="get_share_message">Saved.</string>
     <string name="backup_message">Please select backup location.</string>
-    <string name="remove_date_message">Remove all memo in this date.\n(This cannot be undone)</string>
+    <string name="remove_date_message">Remove %1$d items in this date.\n(This cannot be undone)</string>
 
     <string name="reset">Reset</string>
 
@@ -31,6 +31,8 @@
     <string name="menu">Menu</string>
     <string name="theme">Theme</string>
     <string name="undo">Undo</string>
+    <string name="search">Search</string>
+    <string name="close_search">Close Search</string>
 
     <string name="allow_keypad_prediction">Allow Keypad Prediction</string>
 
@@ -40,7 +42,10 @@
         <item>Date long press → Remove, Copy, Share (All memo in that date)</item>
         <item>Zoom in/out → Font size change</item>
         <item>You can save text from another app by sharing to this app.</item>
+        <item>You can toggle save-mode and search-mode by long-pressing the right bottom button.</item>
     </string-array>
+
+    <string name="patch_116">[Patch Note]\nYou can switch save/search mode by long-pressing the SAVE button.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>Sun</item>

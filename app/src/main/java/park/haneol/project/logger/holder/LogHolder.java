@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+
 import park.haneol.project.logger.R;
 import park.haneol.project.logger.item.BaseItem;
 import park.haneol.project.logger.item.LogItem;
@@ -74,4 +76,34 @@ public class LogHolder extends BaseHolder {
         logView.setTextColor(ColorUtil.colorLog);
         ColorUtil.setItemBackground(itemView);
     }
+
+    public void setItemInSearchMode(LogItem item, String searchString) {
+        if (!item.contains(searchString)) {
+            return;
+        }
+        SpannableString spanText = SpannableString.valueOf(logView.getText());
+        ArrayList<Integer> indexList = findWord(spanText.toString().toLowerCase(), searchString);
+        if (indexList.size() != 0) {
+            int length = searchString.length();
+            for (int i = 0; i < indexList.size(); i++) {
+                int index = indexList.get(i);
+                spanText.setSpan(new BackgroundColorSpan(ColorUtil.colorSearch), index, index + length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            logView.setText(spanText);
+        }
+    }
+
+    private static ArrayList<Integer> findWord(String fromString, String searchString) {
+        ArrayList<Integer> indexList = new ArrayList<>();
+        int i = 0;
+        while (i != -1) {
+            i = fromString.indexOf(searchString, i);
+            if (i != -1) {
+                indexList.add(i);
+                i++;
+            }
+        }
+        return indexList;
+    }
+
 }

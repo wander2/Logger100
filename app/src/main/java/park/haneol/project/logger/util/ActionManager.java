@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -224,7 +225,7 @@ public class ActionManager {
                     public void onClick(DialogInterface dialog, int which) {
                         if (!keypadShown) {
                             UIUtil.hideSoftInput(editDialogView);
-                            UIUtil.hideSoftInput(main.mEditText);
+                            UIUtil.hideSoftInput(main.mInputText);
                         }
                     }
                 })
@@ -238,7 +239,7 @@ public class ActionManager {
                         }
                         if (!keypadShown) {
                             UIUtil.hideSoftInput(editDialogView);
-                            UIUtil.hideSoftInput(main.mEditText);
+                            UIUtil.hideSoftInput(main.mInputText);
                         }
                     }
                 })
@@ -346,6 +347,9 @@ public class ActionManager {
                         if (offset != PrefUtil.timeZoneOffset) {
                             PrefUtil.setTimeOffset(main, offset);
                             main.mAdapter.setItemList(main.mDatabase.load());
+                            main.mAdapter.update(main.isSearchMode);
+                            main.mRecView.scrollDown();
+                            undoItem.clear();
                         }
                     }
                 })
@@ -405,7 +409,8 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        undoItem.set(main.mAdapter.removeItem(position), position, item);
+        main.mAdapter.removeItem(position);
+        undoItem.set(item);
         main.mDatabase.delete(item.getId());
     }
 
@@ -424,15 +429,16 @@ public class ActionManager {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void onClickDateRemove(final int position) {
+        final ArrayList<Integer> idList = main.mAdapter.getIdsInDate(position);
         AlertDialog dialog = new AlertDialog.Builder(main)
                 .setTitle(R.string.remove)
-                .setMessage(main.getString(R.string.remove_date_message))
+                .setMessage(main.getString(R.string.remove_date_message, idList.size()))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ArrayList<Integer> idList = main.mAdapter.removeDate(position);
-                        main.mDatabase.deleteSpan(idList);
+                        main.mAdapter.removeItems(idList);
+                        main.mDatabase.deleteItems(idList);
                         undoItem.clear();
                     }
                 })
@@ -444,16 +450,19 @@ public class ActionManager {
 
     public void onClickSaveButton() {
         LogItem item = null;
-        String text = main.mEditText.getText().toString();
-        if (text.length() > 0) {
-            item = main.mDatabase.insert(text);
-            main.mAdapter.addItem(item);
-            main.mEditText.getText().clear();
-        }
-        main.mRecView.scrollDown();
-        if (undoItem.exist() && item != null) {
-            if (undoItem.item.getId() == item.getId()) {
-                undoItem.clear();
+        Editable text = main.mInputText.getText();
+        if (text != null) {
+            String string = text.toString();
+            if (string.length() > 0) {
+                item = main.mDatabase.insert(string);
+                main.mAdapter.addItem(item);
+                main.mInputText.getText().clear();
+            }
+            main.mRecView.scrollDown();
+            if (undoItem.exist() && item != null) {
+                if (undoItem.item.getId() == item.getId()) {
+                    undoItem.clear();
+                }
             }
         }
     }
@@ -462,9 +471,9 @@ public class ActionManager {
 
     public void onClickUndo() {
         if (undoItem.exist()) {
-            main.mAdapter.addItemAt(undoItem.item, undoItem.position, undoItem.dateRemoved);
+            int position = main.mAdapter.restoreItem(undoItem.item);
             main.mDatabase.insertOfItem(undoItem.item);
-            main.mRecView.scrollToItemPosition(undoItem.position);
+            main.mRecView.scrollToItemPosition(position);
             undoItem.clear();
         }
     }
@@ -641,12 +650,8 @@ public class ActionManager {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private class UndoItem {
-        boolean dateRemoved;
-        int position;
         LogItem item = null;
-        void set(boolean dateRemoved, int position, LogItem item) {
-            this.dateRemoved = dateRemoved;
-            this.position = position;
+        void set(LogItem item) {
             this.item = item;
             main.mUndoButton.setVisibility(View.VISIBLE);
         }

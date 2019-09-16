@@ -20,13 +20,12 @@ public class RecView extends RecyclerView {
     public DataAdapter adapter;
     public DataLayoutManager layoutManager;
 
-    private BlinkAnimation blinkAnimation = new BlinkAnimation();
-
     public RecView(@NonNull Context context) {
         super(context);
         init(null, 0);
     }
 
+    // here
     public RecView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(attrs, 0);
@@ -57,22 +56,25 @@ public class RecView extends RecyclerView {
     }
 
     public void scrollToItemPosition(final int position) {
-        int extent = computeVerticalScrollExtent();
-        if (extent == 0) {
-            // 어떠한 이유로 인해 extent == 0일 경우 (예: 뷰 생성시)
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    scrollToItemPosition(position);
-                }
-            }, 100);
-        } else {
-            layoutManager.scrollToPositionWithOffset(position, extent/2);
-            startBlinkAnimation(position);
+        if (position >= 0 && position < adapter.getItemCount()) {
+            int extent = computeVerticalScrollExtent();
+            if (extent == 0) {
+                // 어떠한 이유로 인해 extent == 0일 경우 (예: 뷰 생성시)
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        scrollToItemPosition(position);
+                    }
+                }, 100);
+            } else {
+                layoutManager.scrollToPositionWithOffset(position, extent/2);
+                startBlinkAnimation(position);
+            }
         }
     }
 
     public void startBlinkAnimation(final int position) {
+        final BlinkAnimation blinkAnimation = new BlinkAnimation();
         postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -169,6 +171,5 @@ public class RecView extends RecyclerView {
         @Override
         public void onAnimationRepeat(Animation animation) {}
     }
-
 
 }

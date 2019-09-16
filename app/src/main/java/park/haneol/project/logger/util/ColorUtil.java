@@ -28,12 +28,14 @@ public class ColorUtil {
     private static int[] WHITE_WEEK_COLOR = new int[7];
 
     private static int colorBackground;  // mRootLayout
-    private static int colorWB; // mEditText - text, imageButton - tint
+    private static int colorWB; // mInputText - text, imageButton - tint
     public static int colorBW; // log highlight - text
     public static int colorTime; // time, date - text
     public static int colorLog; // log - text
     public static int colorHighlight; // log highlight - background
     static int[] WEEK_COLOR = new int[7];
+
+    public static int colorSearch;
 
     public static void init(Activity activity) {
         Resources res = activity.getResources();
@@ -71,6 +73,8 @@ public class ColorUtil {
             colorWB = Color.BLACK;
             colorBW = Color.WHITE;
         }
+
+        colorSearch = res.getColor(R.color.colorSearchMode);
     }
 
     static void themeToggled(Context context) {
@@ -97,7 +101,7 @@ public class ColorUtil {
 
     public static void applyColor(MainActivity mainActivity) {
         mainActivity.mRootLayout.setBackgroundColor(colorBackground);
-        mainActivity.mEditText.setTextColor(colorWB);
+        mainActivity.mInputText.setTextColor(colorWB);
         if (mainActivity.mRecView.getAdapter() != null) {
             mainActivity.mRecView.getAdapter().notifyDataSetChanged();
         }

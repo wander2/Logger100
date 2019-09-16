@@ -3,13 +3,14 @@ package park.haneol.project.logger.component;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import park.haneol.project.logger.R;
@@ -23,7 +24,9 @@ import park.haneol.project.logger.util.Database;
 import park.haneol.project.logger.util.PrefUtil;
 import park.haneol.project.logger.util.TimeUtil;
 import park.haneol.project.logger.util.UIUtil;
+import park.haneol.project.logger.view.InputText;
 import park.haneol.project.logger.view.RootLayout;
+import park.haneol.project.logger.view.SaveButton;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,11 +35,12 @@ public class MainActivity extends AppCompatActivity {
     private static final String RESTORE_EDIT_POSITION = "restore_edit_position";
     private static final String RESTORE_EDIT_DIALOG_TEXT = "restore_edit_dialog_text";
     private static final String RESTORE_EDIT_DIALOG_SELECTION = "restore_edit_dialog_selection";
+    private static final String RESTORE_IS_SEARCH_MODE = "restore_is_search_mode";
 
     public RootLayout mRootLayout;
     public RecView mRecView;
-    public EditText mEditText;
-    public Button mSaveButton;
+    public InputText mInputText;
+    public SaveButton mSaveButton;
     public ImageButton mMenuButton;
     public ImageButton mThemeButton;
     public ImageButton mUndoButton;
@@ -46,9 +50,17 @@ public class MainActivity extends AppCompatActivity {
 
     public ActionManager mActionManager;
 
+    public boolean isSearchMode = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            isSearchMode = savedInstanceState.getBoolean(RESTORE_IS_SEARCH_MODE, false);
+            if (isSearchMode) {
+                setTheme(R.style.SearchTheme);
+            }
+        }
         setContentView(R.layout.activity_main);
         if (!UIUtil.isLandscape(this)) {
             UIUtil.fitCount = 0;
@@ -70,42 +82,109 @@ public class MainActivity extends AppCompatActivity {
         // widget initialize
         mRootLayout = findViewById(R.id.root_layout);
         mRecView = findViewById(R.id.rec_view);
-        mEditText = findViewById(R.id.edit_text);
+        mInputText = findViewById(R.id.edit_text);
         mSaveButton = findViewById(R.id.save_button);
         mMenuButton = findViewById(R.id.menu_button);
         mThemeButton = findViewById(R.id.theme_button);
         mUndoButton = findViewById(R.id.undo_button);
+        if (isSearchMode) {
+            mSaveButton.setText(R.string.search);
+        }
+        if (UIUtil.keypadShown) {
+            UIUtil.showSoftInput(mInputText);
+        }
 
         // apply after widget initialize
         ColorUtil.applyColor(this);
 
         mDatabase = new Database(this);
-        mAdapter = (DataAdapter) mRecView.getAdapter();
+        mAdapter = mRecView.adapter;
         mAdapter.setItemList(mDatabase.load());
+        mAdapter.update(isSearchMode);
+        mRecView.scrollDown();
 
         mActionManager = new ActionManager(this);
         mAdapter.setActionManager(mActionManager);
 
         // 복원
         String textPres = PrefUtil.getTextPreserved(this);
-        mEditText.setText(textPres);
-        mEditText.setSelection(textPres.length());
-        // 엔터 동작
-        mEditText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_INSERT) {
-                    mActionManager.onClickSaveButton();
-                    return true;
-                }
-                return false;
-            }
-        });
+        mInputText.setText(textPres);
+        mInputText.setSelection(textPres.length());
 
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
+        // 검색 모드인지에 따라서 이벤트 처리
+        if (isSearchMode) {
+            // 텍스트 내용으로 우선 검색 실행
+            mAdapter.search(textPres);
+            mRecView.scrollDown();
+
+            // 버튼 -> 다음 검색
+            mSaveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = mAdapter.searchNext();
+                    if (position != -1) {
+                        mRecView.scrollToItemPosition(position);
+                    }
+                }
+            });
+
+            // 엔터 동작 -> 다음 검색
+            mInputText.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_INSERT) {
+                        int position = mAdapter.searchNext();
+                        if (position != -1) {
+                            mRecView.scrollToItemPosition(position);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+
+            // 입력창 변경 -> 변경된 검색 실행
+            mInputText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    mAdapter.search(s.toString());
+                    mRecView.scrollDown();
+                }
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+
+        } else {
+            // 버튼 -> 저장
+            mSaveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mActionManager.onClickSaveButton();
+                }
+            });
+
+            // 엔터 동작 -> 저장
+            mInputText.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_INSERT) {
+                        mActionManager.onClickSaveButton();
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        // 검색 모드 토글
+        mSaveButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View v) {
-                mActionManager.onClickSaveButton();
+            public boolean onLongClick(View v) {
+                isSearchMode = !isSearchMode;
+                recreate();
+                return true;
             }
         });
         mMenuButton.setOnClickListener(new View.OnClickListener() {
@@ -152,14 +231,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         UIUtil.keypadShown = false;
         UIUtil.fitCount = 2;
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         int position = mRecView.layoutManager.findLastVisibleItemPosition();
         outState.putInt(RESTORE_SCROLL_POSITION, position);
@@ -172,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
             outState.putString(RESTORE_EDIT_DIALOG_TEXT, mActionManager.editDialogView.getText().toString());
             outState.putInt(RESTORE_EDIT_DIALOG_SELECTION, mActionManager.editDialogView.getSelectionEnd());
         }
+        outState.putBoolean(RESTORE_IS_SEARCH_MODE, isSearchMode);
     }
 
     @Override
@@ -183,7 +263,10 @@ public class MainActivity extends AppCompatActivity {
             UIUtil.setKeypadShown(getWindow(), UIUtil.keypadShown);
             UIUtil.predictMargin(mRootLayout, false);
         }
-        PrefUtil.setTextPreserved(this, mEditText.getText().toString());
+        Editable text = mInputText.getText();
+        if (text != null) {
+            PrefUtil.setTextPreserved(this, text.toString());
+        }
         super.onStop();
     }
 

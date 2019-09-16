@@ -29,6 +29,21 @@ public class UIUtil {
         }
     }
 
+    public static void showSoftInput(final EditText editText) {
+        final InputMethodManager imm = (InputMethodManager) editText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            editText.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    editText.requestFocus();
+                    imm.showSoftInput(editText, 0);
+                }
+            }, 100);
+        }
+    }
+
     static void hideSoftInput(EditText editText) {
         InputMethodManager imm = (InputMethodManager) editText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {

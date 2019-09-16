@@ -23,7 +23,7 @@
     <string name="copy_message">클립보드에 복사되었습니다.</string>
     <string name="get_share_message">저장되었습니다.</string>
     <string name="backup_message">백업 위치를 선택합니다.</string>
-    <string name="remove_date_message">이 날짜의 메모를 모두 삭제합니다.\n(되돌릴 수 없습니다)</string>
+    <string name="remove_date_message">이 날짜에 있는 %1$d개 메모를 삭제합니다.\n(되돌릴 수 없습니다)</string>
 
     <string name="reset">초기화</string>
 
@@ -31,6 +31,8 @@
     <string name="menu">메뉴</string>
     <string name="theme">테마</string>
     <string name="undo">되돌리기</string>
+    <string name="search">검색</string>
+    <string name="close_search">검색 종료</string>
 
     <string name="allow_keypad_prediction">키패드 예측 기능</string>
 
@@ -40,7 +42,10 @@
         <item>날짜 길게 누르기 → 삭제, 복사, 공유 (해당 날짜의 모든 메모)</item>
         <item>두 손가락으로 줌인/줌아웃 → 글자 크기 변경</item>
         <item>다른 어플에서 텍스트를 공유하여 이 어플에 저장할 수 있습니다.</item>
+        <item>저장 버튼을 길게 누르면 저장모드와 검색모드를 변경할 수 있습니다.</item>
     </string-array>
+
+    <string name="patch_116">[업데이트 내역]\n오른쪽 아래 버튼을 길게 누르면 저장모드와 검색모드를 변경할 수 있습니다.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>일</item>

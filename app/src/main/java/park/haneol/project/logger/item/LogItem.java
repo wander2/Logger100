@@ -53,6 +53,10 @@ public class LogItem extends BaseItem {
         return TimeUtil.getLocalDays(time);
     }
 
+    public boolean contains(String string) {
+        return text.toLowerCase().contains(string);
+    }
+
     public String getTimeString() {
         return TimeUtil.getTimeString(time);
     }

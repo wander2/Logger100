@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/item_view" />
 
-    <EditText
+    <park.haneol.project.logger.view.InputText
         tools:ignore="autoFill"
         android:id="@+id/edit_text"
         android:layout_width="0dp"
@@ -40,11 +40,11 @@
         app:layout_constraintEnd_toStartOf="@id/save_button"
         app:layout_constraintStart_toStartOf="parent">
         <requestFocus />
-    </EditText>
+    </park.haneol.project.logger.view.InputText>
 
-    <Button
-        android:id="@+id/save_button"
+    <park.haneol.project.logger.view.SaveButton
         style="@style/Widget.AppCompat.Button.Colored"
+        android:id="@+id/save_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
