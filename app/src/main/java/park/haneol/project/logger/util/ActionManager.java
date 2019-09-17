@@ -268,7 +268,7 @@ public class ActionManager {
         item.setText(text);
         main.mAdapter.notifyItemChanged(position);
         main.mDatabase.updateText(item.getId(), text);
-        main.mRecView.startBlinkAnimation(position);
+        main.mRecView.startBlinkAnimation(position, true);
 
         // 수정 후 화면 밖으로 나가는 문제 해결
         main.mRecView.postDelayed(new Runnable() {

@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String RESTORE_EDIT_DIALOG_TEXT = "restore_edit_dialog_text";
     private static final String RESTORE_EDIT_DIALOG_SELECTION = "restore_edit_dialog_selection";
     private static final String RESTORE_IS_SEARCH_MODE = "restore_is_search_mode";
+    private static final String RESTORE_IS_MODE_SWITCH = "restore_is_mode_switch";
 
     public RootLayout mRootLayout;
     public RecView mRecView;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     public ActionManager mActionManager;
 
     public boolean isSearchMode = false;
+    private boolean modeSwitch = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = mRecView.adapter;
         mAdapter.setItemList(mDatabase.load());
         mAdapter.update(isSearchMode);
-        mRecView.scrollDown();
 
         mActionManager = new ActionManager(this);
         mAdapter.setActionManager(mActionManager);
@@ -123,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     int position = mAdapter.searchNext();
                     if (position != -1) {
-                        mRecView.scrollToItemPosition(position);
+                        mRecView.scrollToItemPosition(position, false);
                     }
                 }
             });
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                     if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_INSERT) {
                         int position = mAdapter.searchNext();
                         if (position != -1) {
-                            mRecView.scrollToItemPosition(position);
+                            mRecView.scrollToItemPosition(position, false);
                         }
                         return true;
                     }
@@ -183,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onLongClick(View v) {
                 isSearchMode = !isSearchMode;
+                modeSwitch = true;
                 recreate();
                 return true;
             }
@@ -206,28 +208,47 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ActivityObserver.getInstance().setActivity(this);
-
+        mRecView.scrollDown();
         if (savedInstanceState != null) {
-            final int resPosition = savedInstanceState.getInt(RESTORE_SCROLL_POSITION);
-            final int resOffset = savedInstanceState.getInt(RESTORE_SCROLL_OFFSET);
-            mRecView.post(new Runnable() {
-                @Override
-                public void run() {
-                    mRecView.layoutManager.scrollToPositionWithOffset(resPosition, mRecView.getHeight()-resOffset);
-                }
-            });
-            int editPosition = savedInstanceState.getInt(RESTORE_EDIT_POSITION);
-            if (editPosition != -1) {
-                String editDialogText = savedInstanceState.getString(RESTORE_EDIT_DIALOG_TEXT);
-                int editDialogSelection = savedInstanceState.getInt(RESTORE_EDIT_DIALOG_SELECTION);
-                if (editDialogText != null) {
-                    mActionManager.onClickEdit(editPosition);
-                    mActionManager.editDialogView.setText(editDialogText);
-                    mActionManager.editDialogView.setSelection(editDialogSelection);
+            modeSwitch = savedInstanceState.getBoolean(RESTORE_IS_MODE_SWITCH, false);
+            if (!modeSwitch) {
+                // 회전시 스크롤 보존
+                final int resPosition = savedInstanceState.getInt(RESTORE_SCROLL_POSITION);
+                final int resOffset = savedInstanceState.getInt(RESTORE_SCROLL_OFFSET);
+                mRecView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRecView.layoutManager.scrollToPositionWithOffset(resPosition, mRecView.getHeight()-resOffset);
+                    }
+                });
+                int editPosition = savedInstanceState.getInt(RESTORE_EDIT_POSITION);
+                if (editPosition != -1) {
+                    String editDialogText = savedInstanceState.getString(RESTORE_EDIT_DIALOG_TEXT);
+                    int editDialogSelection = savedInstanceState.getInt(RESTORE_EDIT_DIALOG_SELECTION);
+                    if (editDialogText != null) {
+                        mActionManager.onClickEdit(editPosition);
+                        mActionManager.editDialogView.setText(editDialogText);
+                        mActionManager.editDialogView.setSelection(editDialogSelection);
+                    }
                 }
             }
+
+            // 모드 변경시 스크롤 다운
+            if (modeSwitch) {
+                mRecView.scrollToPosition(mAdapter.getItemCount() - 1);
+                mRecView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRecView.scrollToPosition(mAdapter.getItemCount() - 1);
+                    }
+                }, 100);
+                modeSwitch = false;
+                savedInstanceState.putBoolean(RESTORE_IS_MODE_SWITCH, false);
+            }
         }
+
+        // 객체 보존
+        ActivityObserver.getInstance().setActivity(this);
     }
 
     @Override
@@ -252,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
             outState.putInt(RESTORE_EDIT_DIALOG_SELECTION, mActionManager.editDialogView.getSelectionEnd());
         }
         outState.putBoolean(RESTORE_IS_SEARCH_MODE, isSearchMode);
+        outState.putBoolean(RESTORE_IS_MODE_SWITCH, modeSwitch);
     }
 
     @Override

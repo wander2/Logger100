@@ -55,7 +55,11 @@ public class RecView extends RecyclerView {
         }
     }
 
-    public void scrollToItemPosition(final int position) {
+    public void scrollToItemPosition(int position) {
+        scrollToItemPosition(position, false);
+    }
+
+    public void scrollToItemPosition(final int position, final boolean isLong) {
         if (position >= 0 && position < adapter.getItemCount()) {
             int extent = computeVerticalScrollExtent();
             if (extent == 0) {
@@ -63,24 +67,24 @@ public class RecView extends RecyclerView {
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        scrollToItemPosition(position);
+                        scrollToItemPosition(position, isLong);
                     }
                 }, 100);
             } else {
                 layoutManager.scrollToPositionWithOffset(position, extent/2);
-                startBlinkAnimation(position);
+                startBlinkAnimation(position, isLong);
             }
         }
     }
 
-    public void startBlinkAnimation(final int position) {
+    public void startBlinkAnimation(final int position, boolean isLong) {
         final BlinkAnimation blinkAnimation = new BlinkAnimation();
         postDelayed(new Runnable() {
             @Override
             public void run() {
                 blinkAnimation.start(position);
             }
-        }, blinkAnimation.DELAY);
+        }, isLong ? blinkAnimation.DELAY_LONG : blinkAnimation.DELAY_SHORT);
     }
 
     @Override
@@ -117,7 +121,8 @@ public class RecView extends RecyclerView {
 
     private class BlinkAnimation extends Animation implements Animation.AnimationListener {
 
-        int DELAY = 250;
+        int DELAY_SHORT = 50;
+        int DELAY_LONG = 250;
         int DURATION = 1750;
 
         int mPosition;
