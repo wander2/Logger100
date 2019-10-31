@@ -51,7 +51,7 @@
         <item>You can toggle save-mode and search-mode by long-pressing the right bottom button.</item>
     </string-array>
 
-    <string name="patch_116">[Patch Note]\nYou can switch save/search mode by long-pressing the SAVE button.</string>
+    <string name="patch_note">[Update]\n1. Setting-Hide screen on recent app list\n2. Quick Log shortcut (Menu-Create shortcut)\n - Quick Log shortcut will be created in the home screen.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>Sun</item>

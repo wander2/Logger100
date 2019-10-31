@@ -23,7 +23,7 @@ public class Database extends SQLiteOpenHelper {
     private Context context;
 
     private static final String DATABASE_NAME  = "logger.db";
-    private static final int DATABASE_VERSION  = 41;
+    private static final int DATABASE_VERSION  = 42;
 
     private static final String TABLE_LOG_LIST = "log_list";
     private static final String COL_LOG_ID     = "log_id";
@@ -53,8 +53,8 @@ public class Database extends SQLiteOpenHelper {
                     " ADD COLUMN " + COL_FLAG + " INTEGER DEFAULT 0");
             clearPrefData48(db);
         }
-        if (oldVersion < 41) {
-            insertNote(db, context.getString(R.string.patch_116));
+        if (oldVersion < DATABASE_VERSION) {
+            insertNote(db, context.getString(R.string.patch_note));
         }
     }
 
@@ -71,6 +71,7 @@ public class Database extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COL_TIME, TimeUtil.getCurrentTime());
         values.put(COL_LOG, string);
+        values.put(COL_FLAG, 1);
         db.insert(TABLE_LOG_LIST, null, values);
     }
 

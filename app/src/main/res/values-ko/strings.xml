@@ -51,7 +51,7 @@
         <item>저장 버튼을 길게 누르면 저장모드와 검색모드를 변경할 수 있습니다.</item>
     </string-array>
 
-    <string name="patch_116">[업데이트 내역]\n오른쪽 아래 버튼을 길게 누르면 저장모드와 검색모드를 변경할 수 있습니다.</string>
+    <string name="patch_note">[업데이트]\n1. 설정-최근 앱 목록에서 화면 숨김 기능 추가\n2. 빠른기록 바로가기 기능 추가 (메뉴-바로가기 생성)\n - 홈 화면에 빠른기록 바로가기가 생성됩니다.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>일</item>
