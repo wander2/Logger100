@@ -199,4 +199,24 @@ public class PrefUtil {
         getPref(context).edit().remove(KEY_ACCENT_SET).apply();
     }
 
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static final String KEY_IS_SCREEN_SECURE = "is_screen_secure";
+
+    public static boolean getIsScreenSecure(Context context) {
+        return getPref(context).getBoolean(KEY_IS_SCREEN_SECURE, false);
+    }
+
+    static void setScreenSecure(Context context, boolean isScreenSecure) {
+        getPref(context).edit().putBoolean(KEY_IS_SCREEN_SECURE, isScreenSecure).apply();
+    }
+
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Logger</string>
+    <string name="shortcut_name">Quick Log</string>
 
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
@@ -14,14 +15,18 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="ok">OK</string>
+    <string name="create">Create</string>
+    <string name="hint_default">Default</string>
 
     <string name="setting">Setting</string>
     <string name="timezone">Timezone</string>
     <string name="backup">Backup</string>
     <string name="date_format">Date Format</string>
+    <string name="shortcut">Create shortcut</string>
+    <string name="shortcut_complete">Shortcut is created.</string>
 
     <string name="copy_message">Copied to clipboard.</string>
-    <string name="get_share_message">Saved.</string>
+    <string name="saved_message">Text saved in Logger.</string>
     <string name="backup_message">Please select backup location.</string>
     <string name="remove_date_message">Remove %1$d items in this date.\n(This cannot be undone)</string>
 
@@ -35,6 +40,7 @@
     <string name="close_search">Close Search</string>
 
     <string name="allow_keypad_prediction">Allow Keypad Prediction</string>
+    <string name="setting_secure">Hide screen on recent app list (require relaunch)</string>
 
     <string-array name="db_help">
         <item>Item click → Edit, Remove</item>

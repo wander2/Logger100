@@ -57,6 +57,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 화면 보안
+        if (PrefUtil.getIsScreenSecure(this)) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        }
+
         if (savedInstanceState != null) {
             isSearchMode = savedInstanceState.getBoolean(RESTORE_IS_SEARCH_MODE, false);
             if (isSearchMode) {
@@ -316,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 공유 받음
-    void onTextShared(LogItem item) {
+    void onTextSavedFromOutside(LogItem item) {
         mAdapter.addItem(item);
         mRecView.scrollToItemPosition(mAdapter.getItemCount() - 1);
     }

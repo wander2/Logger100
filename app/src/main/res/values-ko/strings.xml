@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">기록장</string>
+    <string name="shortcut_name">빠른기록</string>
 
     <string name="edit">수정</string>
     <string name="remove">삭제</string>
@@ -14,14 +15,18 @@
     <string name="cancel">취소</string>
     <string name="confirm">확인</string>
     <string name="ok">확인</string>
+    <string name="create">생성</string>
+    <string name="hint_default">기본값</string>
 
     <string name="setting">설정</string>
     <string name="timezone">시간대</string>
     <string name="backup">백업</string>
     <string name="date_format">날짜 형식</string>
+    <string name="shortcut">바로가기 생성</string>
+    <string name="shortcut_complete">바로가기가 생성되었습니다.</string>
 
     <string name="copy_message">클립보드에 복사되었습니다.</string>
-    <string name="get_share_message">저장되었습니다.</string>
+    <string name="saved_message">기록장에 저장되었습니다.</string>
     <string name="backup_message">백업 위치를 선택합니다.</string>
     <string name="remove_date_message">이 날짜에 있는 %1$d개 메모를 삭제합니다.\n(되돌릴 수 없습니다)</string>
 
@@ -35,6 +40,7 @@
     <string name="close_search">검색 종료</string>
 
     <string name="allow_keypad_prediction">키패드 예측 기능</string>
+    <string name="setting_secure">최근 앱 목록에서 화면 숨김 (재시작시 적용)</string>
 
     <string-array name="db_help">
         <item>메모 클릭 → 수정, 삭제</item>

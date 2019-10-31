@@ -1,5 +1,6 @@
 package park.haneol.project.logger.util;
 
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -25,6 +26,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.FileProvider;
+import androidx.core.content.pm.ShortcutInfoCompat;
+import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +40,7 @@ import java.util.List;
 
 import park.haneol.project.logger.R;
 import park.haneol.project.logger.component.MainActivity;
+import park.haneol.project.logger.component.ShortcutActivity;
 import park.haneol.project.logger.item.BaseItem;
 import park.haneol.project.logger.item.DateItem;
 import park.haneol.project.logger.item.LogItem;
@@ -168,7 +173,8 @@ public class ActionManager {
     public void onClickMenu(View anchor) {
         int[] titleRes = {
                 R.string.setting,
-                R.string.backup
+                R.string.backup,
+                R.string.shortcut
         };
         popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -179,6 +185,9 @@ public class ActionManager {
                         return true;
                     case 1:
                         onClickBackup();
+                        return true;
+                    case 2:
+                        onClickCreateShortcut();
                         return true;
                 }
                 return false;
@@ -207,8 +216,6 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        final boolean keypadShown = UIUtil.keypadShown;
-
         // Make Content View
         editDialogView = new EditText(main);
         editDialogView.setText(item.getText());
@@ -223,10 +230,8 @@ public class ActionManager {
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (!keypadShown) {
-                            UIUtil.hideSoftInput(editDialogView);
-                            UIUtil.hideSoftInput(main.mInputText);
-                        }
+                        UIUtil.hideSoftInput(editDialogView);
+                        UIUtil.hideSoftInput(main.mInputText);
                     }
                 })
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
@@ -237,10 +242,8 @@ public class ActionManager {
                         if (text.length() > 0) {
                             onEditConfirm(item, position, text);
                         }
-                        if (!keypadShown) {
-                            UIUtil.hideSoftInput(editDialogView);
-                            UIUtil.hideSoftInput(main.mInputText);
-                        }
+                        UIUtil.hideSoftInput(editDialogView);
+                        UIUtil.hideSoftInput(main.mInputText);
                     }
                 })
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -304,17 +307,14 @@ public class ActionManager {
     private void onClickSetting() {
         final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout, main.mRootLayout, false);
 
+        // 타임존
         final Spinner spinner = contentView.findViewById(R.id.setting_timezone_spinner);
         ArrayAdapter<CharSequence> spinnerAdapter = new ArrayAdapter<>(main, android.R.layout.simple_spinner_item, UTC_STRING);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
         spinner.setSelection(UTC_INT.indexOf(PrefUtil.timeZoneOffset));
 
-        if (Build.VERSION.SDK_INT >= 19) {
-            CheckBox checkBox = contentView.findViewById(R.id.setting_allow_keypad_prediction);
-            checkBox.setChecked(PrefUtil.onStartKeypad);
-        }
-
+        // 타임존 버튼
         Button resetTimezoneButton = contentView.findViewById(R.id.setting_timezone_reset);
         resetTimezoneButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -323,26 +323,28 @@ public class ActionManager {
             }
         });
 
+        // 날짜 형식
         final EditText editText = contentView.findViewById(R.id.setting_date_format);
         editText.setText(PrefUtil.dateFormat);
-        //editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
+        // 키패드 예측
+        if (Build.VERSION.SDK_INT >= 19) {
+            CheckBox keypadPrediction = contentView.findViewById(R.id.setting_allow_keypad_prediction);
+            keypadPrediction.setChecked(PrefUtil.onStartKeypad);
+        }
+
+        // 화면 보안
+        final CheckBox screenSecure = contentView.findViewById(R.id.setting_secure);
+        screenSecure.setChecked(PrefUtil.getIsScreenSecure(main));
+
+        // 다이얼로그
         AlertDialog dialog = new AlertDialog.Builder(main)
                 .setView(contentView)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (Build.VERSION.SDK_INT >= 19) {
-                            CheckBox checkBox = contentView.findViewById(R.id.setting_allow_keypad_prediction);
-                            PrefUtil.setOnStartKeypad(main, checkBox.isChecked());
-                        }
-
-                        if (!editText.getText().toString().equals(PrefUtil.dateFormat)) {
-                            PrefUtil.setDateFormat(main, editText.getText().toString());
-                            main.mAdapter.notifyDataSetChanged();
-                        }
-
+                        // 타임존
                         int offset = UTC_INT.get(spinner.getSelectedItemPosition());
                         if (offset != PrefUtil.timeZoneOffset) {
                             PrefUtil.setTimeOffset(main, offset);
@@ -350,6 +352,26 @@ public class ActionManager {
                             main.mAdapter.update(main.isSearchMode);
                             main.mRecView.scrollDown();
                             undoItem.clear();
+                        }
+
+                        // 날짜 형식
+                        if (!editText.getText().toString().equals(PrefUtil.dateFormat)) {
+                            PrefUtil.setDateFormat(main, editText.getText().toString());
+                            main.mAdapter.notifyDataSetChanged();
+                        }
+
+                        // 키패드 예측
+                        if (Build.VERSION.SDK_INT >= 19) {
+                            CheckBox checkBox = contentView.findViewById(R.id.setting_allow_keypad_prediction);
+                            PrefUtil.setOnStartKeypad(main, checkBox.isChecked());
+                        }
+
+                        // 화면 보안
+                        PrefUtil.setScreenSecure(main, screenSecure.isChecked());
+                        if (screenSecure.isChecked()) {
+                            main.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+                        } else {
+                            main.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
                         }
                     }
                 })
@@ -380,6 +402,78 @@ public class ActionManager {
                 })
                 .create();
         dialog.show();
+    }
+
+
+    // todo 검색 체크박스 추가
+    private void onClickCreateShortcut() {
+        // Make Content View
+        final EditText editText = new EditText(main);
+        editText.setHint(R.string.hint_default);
+        editText.requestFocus();
+
+        // Make Dialog
+        AlertDialog dialog = new AlertDialog.Builder(main)
+                .setTitle(R.string.shortcut)
+                .setView(editText)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        UIUtil.hideSoftInput(editText);
+                        UIUtil.hideSoftInput(main.mInputText);
+                    }
+                })
+                .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 확인시 작동
+                        createShortcut(editText.getText().toString());
+                        UIUtil.hideSoftInput(editText);
+                        UIUtil.hideSoftInput(main.mInputText);
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        UIUtil.isPopupEditing = false;
+                    }
+                })
+                .create();
+
+        // 키패드 올리기
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+
+        dialog.show();
+        UIUtil.isPopupEditing = true;
+    }
+
+    private void createShortcut(String defaultText) {
+        if (ShortcutManagerCompat.isRequestPinShortcutSupported(main)) {
+            String shortLabel = defaultText.length() >= 10 ? defaultText.substring(0, 10) : defaultText; // 10자
+            String longLabel = defaultText.length() >= 25 ? defaultText.substring(0, 25) : defaultText; // 25자
+            Intent intent = new Intent(main, ShortcutActivity.class);
+            intent.putExtra(ShortcutActivity.EXTRA_DEFAULT_TEXT, defaultText);
+            intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            if (defaultText.length() == 0) {
+                shortLabel = main.getString(R.string.shortcut_name);
+                longLabel = main.getString(R.string.shortcut_name);
+            }
+            ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(main, "logger_shortcut")
+                    .setShortLabel(shortLabel)
+                    .setLongLabel(longLabel)
+                    .setIcon(IconCompat.createWithResource(main, R.mipmap.ic_launcher))
+                    .setIntent(intent)
+                    .build();
+            Intent pinnedShortcutCallbackIntent = ShortcutManagerCompat.createShortcutResultIntent(main, pinShortcutInfo);
+            PendingIntent successCallback = PendingIntent.getBroadcast(main, 0, pinnedShortcutCallbackIntent, 0);
+            boolean isSuccess = ShortcutManagerCompat.requestPinShortcut(main, pinShortcutInfo, successCallback.getIntentSender());
+            if (isSuccess) {
+                Toast.makeText(main, R.string.shortcut_complete, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

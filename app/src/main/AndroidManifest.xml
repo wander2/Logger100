@@ -1,59 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="park.haneol.project.logger">
-
-    <!--페이지 바로가기 생성-->
+    <!-- 페이지 바로가기 생성 -->
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
 
-    <!--오토백업 일단 true 설정 TODO: 관련 내용 공부-->
     <application
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <!--싱글인스턴스, 스테이트비저블
-            android:screenOrientation="portrait"-->
-        <!-- todo: portrait -> default -->
         <activity
             android:name=".component.MainActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="stateVisible"
-            android:configChanges="orientation|keyboardHidden">
+            android:windowSoftInputMode="stateVisible">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="myar.tistory.com" android:scheme="http" />
-            </intent-filter>
-        </activity>
 
-        <!--공유 이벤트시 실행 액티비티-->
+                <data
+                    android:host="myar.tistory.com"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity> <!-- 공유 이벤트시 실행 액티비티 -->
         <activity
             android:name=".component.ShareActivity"
             android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".component.ShortcutActivity"
+            android:theme="@style/DialogTheme"
+            android:exported="true">
+        </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
-            android:grantUriPermissions="true"
-            android:exported="false">
-            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
     </application>
 
 </manifest>

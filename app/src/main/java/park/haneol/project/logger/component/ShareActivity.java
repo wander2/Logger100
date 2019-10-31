@@ -40,22 +40,17 @@ public class ShareActivity extends Activity {
 
                 MainActivity activity = ActivityObserver.getInstance().getActivity();
                 if (activity != null) {
-                    activity.onTextShared(item);
-                } else {
-                    setTextNotification(item, text);
-                    Toast.makeText(this, getString(R.string.get_share_message), Toast.LENGTH_SHORT).show();
+                    activity.onTextSavedFromOutside(item);
                 }
-
+                setTextNotification(item, text);
+                Toast.makeText(this, getString(R.string.saved_message), Toast.LENGTH_SHORT).show();
             }
         }
-
         finish();
     }
 
     private void setTextNotification(LogItem item, String text) {
         Intent intent = new Intent(this, MainActivity.class);
-        //intent.putExtra("id", item.getId());
-        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         createNotificationChannel();
@@ -75,10 +70,8 @@ public class ShareActivity extends Activity {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             CharSequence name = getString(R.string.app_name);
-            //String description = getString(R.string.app_name);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            //channel.setDescription(description);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
