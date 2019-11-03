@@ -454,6 +454,7 @@ public class ActionManager {
             String shortLabel = defaultText.length() >= 10 ? defaultText.substring(0, 10) : defaultText; // 10자
             String longLabel = defaultText.length() >= 25 ? defaultText.substring(0, 25) : defaultText; // 25자
             Intent intent = new Intent(main, ShortcutActivity.class);
+            intent.setAction(Intent.ACTION_DEFAULT);
             intent.putExtra(ShortcutActivity.EXTRA_DEFAULT_TEXT, defaultText);
             intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -461,7 +462,7 @@ public class ActionManager {
                 shortLabel = main.getString(R.string.shortcut_name);
                 longLabel = main.getString(R.string.shortcut_name);
             }
-            ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(main, "logger_shortcut")
+            ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(main, "logger_shortcut_"+defaultText)
                     .setShortLabel(shortLabel)
                     .setLongLabel(longLabel)
                     .setIcon(IconCompat.createWithResource(main, R.mipmap.ic_launcher))
@@ -469,10 +470,7 @@ public class ActionManager {
                     .build();
             Intent pinnedShortcutCallbackIntent = ShortcutManagerCompat.createShortcutResultIntent(main, pinShortcutInfo);
             PendingIntent successCallback = PendingIntent.getBroadcast(main, 0, pinnedShortcutCallbackIntent, 0);
-            boolean isSuccess = ShortcutManagerCompat.requestPinShortcut(main, pinShortcutInfo, successCallback.getIntentSender());
-            if (isSuccess) {
-                Toast.makeText(main, R.string.shortcut_complete, Toast.LENGTH_SHORT).show();
-            }
+            ShortcutManagerCompat.requestPinShortcut(main, pinShortcutInfo, successCallback.getIntentSender());
         }
     }
 
