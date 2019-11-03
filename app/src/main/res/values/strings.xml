@@ -23,7 +23,6 @@
     <string name="backup">Backup</string>
     <string name="date_format">Date Format</string>
     <string name="shortcut">Create shortcut</string>
-    <string name="shortcut_complete">Shortcut is created.</string>
 
     <string name="copy_message">Copied to clipboard.</string>
     <string name="saved_message">Text saved in Logger.</string>
@@ -49,9 +48,10 @@
         <item>Zoom in/out → Font size change</item>
         <item>You can save text from another app by sharing to this app.</item>
         <item>You can toggle save-mode and search-mode by long-pressing the right bottom button.</item>
+        <item>You can create Quick Log shortcut at the home screen. (Top right Menu - Create shortcut)</item>
     </string-array>
 
-    <string name="patch_note">[Update]\n1. Setting-Hide screen on recent app list\n2. Quick Log shortcut (Menu-Create shortcut)\n - Quick Log shortcut will be created in the home screen.</string>
+    <string name="patch_note">[Update]\n1. Setting-Hide screen on recent app list\n2. Quick Log shortcut (Menu-Create shortcut)\n - Quick Log shortcut will be created at the home screen.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>Sun</item>
