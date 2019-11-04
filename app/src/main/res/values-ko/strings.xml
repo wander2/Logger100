@@ -16,17 +16,17 @@
     <string name="confirm">확인</string>
     <string name="ok">확인</string>
     <string name="create">생성</string>
-    <string name="hint_default">기본값</string>
+    <string name="hint_label">라벨</string>
 
     <string name="setting">설정</string>
     <string name="timezone">시간대</string>
     <string name="backup">백업</string>
     <string name="date_format">날짜 형식</string>
+    <string name="date_format_change">날짜 형식 변경</string>
     <string name="shortcut">바로가기 생성</string>
 
     <string name="copy_message">클립보드에 복사되었습니다.</string>
     <string name="saved_message">기록장에 저장되었습니다.</string>
-    <string name="backup_message">백업 위치를 선택합니다.</string>
     <string name="remove_date_message">이 날짜에 있는 %1$d개 메모를 삭제합니다.\n(되돌릴 수 없습니다)</string>
 
     <string name="reset">초기화</string>
@@ -39,7 +39,11 @@
     <string name="close_search">검색 종료</string>
 
     <string name="allow_keypad_prediction">키패드 예측 기능</string>
-    <string name="setting_secure">최근 앱 목록에서 화면 숨김 (재시작시 적용)</string>
+    <string name="setting_secure">최근 앱 목록에서 화면 숨김</string>
+
+    <string name="label_separator">바로가기에서 라벨 구분자</string>
+    <string name="left">왼쪽</string>
+    <string name="right">오른쪽</string>
 
     <string-array name="db_help">
         <item>메모 클릭 → 수정, 삭제</item>

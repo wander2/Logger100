@@ -30,6 +30,9 @@ import park.haneol.project.logger.view.SaveButton;
 
 public class MainActivity extends AppCompatActivity {
 
+    static final String EXTRA_SEARCH_INTENT = "extra_search_intent";
+    static final String EXTRA_SEARCH_INTENT_TEXT = "extra_search_intent_text";
+
     private static final String RESTORE_SCROLL_POSITION = "restore_scroll_position";
     private static final String RESTORE_SCROLL_OFFSET = "restore_scroll_offset";
     private static final String RESTORE_EDIT_POSITION = "restore_edit_position";
@@ -62,12 +65,18 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         }
 
+        // 검색 모드 확인
         if (savedInstanceState != null) {
             isSearchMode = savedInstanceState.getBoolean(RESTORE_IS_SEARCH_MODE, false);
-            if (isSearchMode) {
-                setTheme(R.style.SearchTheme);
-            }
         }
+        boolean searchIntent = getIntent().getBooleanExtra(EXTRA_SEARCH_INTENT, false);
+        getIntent().removeExtra(EXTRA_SEARCH_INTENT);
+        isSearchMode = isSearchMode || searchIntent;
+        if (isSearchMode) {
+            setTheme(R.style.SearchTheme);
+        }
+
+        // 뷰 설정, 가로세로 적응
         setContentView(R.layout.activity_main);
         if (!UIUtil.isLandscape(this)) {
             UIUtil.fitCount = 0;
@@ -78,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             UIUtil.fitCount = 2;
         }
 
-        // apply before widget initialize
+        // 뷰 초기화 이전 설정
         if (Build.VERSION.SDK_INT >= 19) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
@@ -86,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         TimeUtil.init(this);
         ColorUtil.init(this);
 
-        // widget initialize
+        // 뷰 초기화
         mRootLayout = findViewById(R.id.root_layout);
         mRecView = findViewById(R.id.rec_view);
         mInputText = findViewById(R.id.edit_text);
@@ -101,26 +110,35 @@ public class MainActivity extends AppCompatActivity {
             UIUtil.showSoftInput(mInputText);
         }
 
-        // apply after widget initialize
+        // 뷰 초기화 이후 설정
         ColorUtil.applyColor(this);
 
+        // 데이터베이스, 어댑터 등 설정
         mDatabase = new Database(this);
         mAdapter = mRecView.adapter;
         mAdapter.setItemList(mDatabase.load());
         mAdapter.update(isSearchMode);
-
         mActionManager = new ActionManager(this);
         mAdapter.setActionManager(mActionManager);
 
-        // 복원
-        String textPres = PrefUtil.getTextPreserved(this);
-        mInputText.setText(textPres);
-        mInputText.setSelection(textPres.length());
+        // 입력창 초기화 (복원, 빠른검색)
+        if (searchIntent) {
+            String searchText = getIntent().getStringExtra(EXTRA_SEARCH_INTENT_TEXT);
+            getIntent().removeExtra(EXTRA_SEARCH_INTENT_TEXT);
+            if (searchText != null) {
+                mInputText.setText(searchText);
+                mInputText.setSelection(searchText.length());
+            }
+        }
 
         // 검색 모드인지에 따라서 이벤트 처리
         if (isSearchMode) {
             // 텍스트 내용으로 우선 검색 실행
-            mAdapter.search(textPres);
+            if (mInputText.getText() != null) {
+                mAdapter.search(mInputText.getText().toString());
+            } else {
+                mAdapter.search("");
+            }
             mRecView.scrollDown();
 
             // 버튼 -> 다음 검색
@@ -289,10 +307,6 @@ public class MainActivity extends AppCompatActivity {
             }
             UIUtil.setKeypadShown(getWindow(), UIUtil.keypadShown);
             UIUtil.predictMargin(mRootLayout, false);
-        }
-        Editable text = mInputText.getText();
-        if (text != null) {
-            PrefUtil.setTextPreserved(this, text.toString());
         }
         super.onStop();
     }

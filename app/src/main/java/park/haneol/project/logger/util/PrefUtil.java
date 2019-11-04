@@ -34,22 +34,6 @@ public class PrefUtil {
 
 
 
-    private static final String KEY_TEXT_PRESERVED = "editTextPreserved";
-
-    public static String getTextPreserved(Context context) {
-        return getPref(context).getString(KEY_TEXT_PRESERVED, "");
-    }
-
-    public static void setTextPreserved(Context context, String text) {
-        getPref(context).edit().putString(KEY_TEXT_PRESERVED, text).apply();
-    }
-
-
-
-
-
-
-
 
 
     private static final String KEY_THEME_COLOR_NUMBER = "themeColorNumber";
@@ -218,5 +202,30 @@ public class PrefUtil {
     static void setScreenSecure(Context context, boolean isScreenSecure) {
         getPref(context).edit().putBoolean(KEY_IS_SCREEN_SECURE, isScreenSecure).apply();
     }
+
+
+
+
+    private static final String KEY_LABEL_SEPARATOR_LEFT = "label_separator_left";
+
+    public static String getLabelSeparatorLeft(Context context) {
+        return getPref(context).getString(KEY_LABEL_SEPARATOR_LEFT, "(");
+    }
+
+    static void setLabelSeparatorLeft(Context context, String labelSeparatorLeft) {
+        getPref(context).edit().putString(KEY_LABEL_SEPARATOR_LEFT, labelSeparatorLeft).apply();
+    }
+
+
+    private static final String KEY_LABEL_SEPARATOR_RIGHT = "label_separator_right";
+
+    public static String getLabelSeparatorRight(Context context) {
+        return getPref(context).getString(KEY_LABEL_SEPARATOR_RIGHT, ") ");
+    }
+
+    static void setLabelSeparatorRight(Context context, String labelSeparatorRight) {
+        getPref(context).edit().putString(KEY_LABEL_SEPARATOR_RIGHT, labelSeparatorRight).apply();
+    }
+
 
 }

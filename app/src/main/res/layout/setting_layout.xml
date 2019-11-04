@@ -39,44 +39,16 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingRight="10dp"
-            android:paddingEnd="10dp"
-            android:textColor="@android:color/black"
-            android:text="@string/date_format"/>
-
-        <EditText
-            android:id="@+id/setting_date_format"
-            android:inputType="textNoSuggestions"
-            android:hint="{YYYY}-{M}-{D} {wf}({DDD}){wt}"
-            tools:ignore="autoFill"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
-    <TextView
-        tools:ignore="UnusedAttribute"
+    <Button
+        android:id="@+id/setting_button_date_format_change"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:typeface="monospace"
-        android:fontFamily="monospace"
-        android:layout_marginTop="10dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
-        android:text="@string/date_format_help"/>
+        android:text="@string/date_format_change"/>
+
 
     <CheckBox
         android:id="@+id/setting_secure"
@@ -86,5 +58,65 @@
         android:layout_marginBottom="10dp"
         android:layout_height="wrap_content"
         android:text="@string/setting_secure" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="10dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            android:paddingEnd="10dp"
+            android:textColor="@android:color/black"
+            android:text="@string/label_separator"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="10dp"
+                android:paddingEnd="10dp"
+                android:textColor="@android:color/black"
+                android:text="@string/left"/>
+
+            <EditText
+                android:id="@+id/setting_label_separator_left"
+                android:inputType="textNoSuggestions"
+                android:hint="@null"
+                tools:ignore="autoFill"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="10dp"
+                android:paddingEnd="10dp"
+                android:textColor="@android:color/black"
+                android:text="@string/right"/>
+
+            <EditText
+                android:id="@+id/setting_label_separator_right"
+                android:inputType="textNoSuggestions"
+                android:hint="@null"
+                tools:ignore="autoFill"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
 
 </LinearLayout>

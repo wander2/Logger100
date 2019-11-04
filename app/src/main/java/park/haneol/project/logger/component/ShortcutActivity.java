@@ -2,6 +2,7 @@ package park.haneol.project.logger.component;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -12,29 +13,46 @@ import park.haneol.project.logger.R;
 import park.haneol.project.logger.item.LogItem;
 import park.haneol.project.logger.util.ActivityObserver;
 import park.haneol.project.logger.util.Database;
+import park.haneol.project.logger.util.PrefUtil;
 import park.haneol.project.logger.view.ShortcutEditText;
 
 public class ShortcutActivity extends AppCompatActivity {
 
-    public static final String EXTRA_DEFAULT_TEXT = "extra_default_text";
+    public static final String EXTRA_SHORTCUT_LABEL = "extra_shortcut_label";
 
     private ShortcutEditText editText;
+    private String label;
 
     private boolean isSaved = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 바깥 터치 불가
         setFinishOnTouchOutside(false);
+
+        // 바깥 흐려짐 없앰
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
+        // 키보드 올림
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+        // 라벨 타이틀
+        label = getIntent().getStringExtra(EXTRA_SHORTCUT_LABEL);
+        if (label != null && label.length() > 0) {
+            setTitle(label);
+        } else {
+            setTitle(R.string.shortcut_name);
+        }
+
+        // 뷰 설정
         setContentView(R.layout.shortcut_layout);
         editText = findViewById(R.id.edit_text);
-        String defaultText = getIntent().getStringExtra(EXTRA_DEFAULT_TEXT);
-        if (defaultText != null) {
-            editText.setText(defaultText);
-            editText.setSelection(defaultText.length());
-        }
+        Button neutralButton = findViewById(R.id.neutral_button);
+        Button negativeButton = findViewById(R.id.negative_button);
+        Button positiveButton = findViewById(R.id.positive_button);
+
+        // 백 버튼 동작
         editText.setListener(new ShortcutEditText.Listener() {
             @Override
             public void onBackPressed() {
@@ -47,8 +65,15 @@ public class ShortcutActivity extends AppCompatActivity {
                 }
             }
         });
-        Button negativeButton = findViewById(R.id.negative_button);
-        Button positiveButton = findViewById(R.id.positive_button);
+
+        // 버튼 동작
+        neutralButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = editText.getString();
+                onSearch(text);
+            }
+        });
         negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,14 +85,19 @@ public class ShortcutActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String text = editText.getString();
-                if (text.length() > 0) {
-                    onSave(text);
-                }
+                onSave(text);
             }
         });
     }
 
     private void onSave(String text) {
+        if (text.length() == 0) {
+            text = " ";
+        }
+        if (label != null && label.length() > 0) {
+            text = PrefUtil.getLabelSeparatorLeft(this) + label + PrefUtil.getLabelSeparatorRight(this) + text;
+        }
+
         Database database = new Database(this);
         LogItem item = database.insert(text);
 
@@ -77,6 +107,27 @@ public class ShortcutActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, getString(R.string.saved_message), Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private void onSearch(String text) {
+        String searchText = "";
+        if (label != null && label.length() > 0) {
+            searchText = label;
+        }
+        if (text.trim().length() > 0) {
+            searchText = text.trim();
+        }
+        Intent intent = new Intent(ShortcutActivity.this, MainActivity.class);
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.putExtra(MainActivity.EXTRA_SEARCH_INTENT, true);
+        intent.putExtra(MainActivity.EXTRA_SEARCH_INTENT_TEXT, searchText);
+
+        MainActivity activity = ActivityObserver.getInstance().getActivity();
+        if (activity != null) {
+            activity.finish();
+        }
+        startActivity(intent);
         finish();
     }
 

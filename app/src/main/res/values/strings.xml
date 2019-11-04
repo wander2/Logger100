@@ -16,17 +16,17 @@
     <string name="confirm">Confirm</string>
     <string name="ok">OK</string>
     <string name="create">Create</string>
-    <string name="hint_default">Default</string>
+    <string name="hint_label">Label</string>
 
     <string name="setting">Setting</string>
     <string name="timezone">Timezone</string>
     <string name="backup">Backup</string>
     <string name="date_format">Date Format</string>
+    <string name="date_format_change">Change date format</string>
     <string name="shortcut">Create shortcut</string>
 
     <string name="copy_message">Copied to clipboard.</string>
     <string name="saved_message">Text saved in Logger.</string>
-    <string name="backup_message">Please select backup location.</string>
     <string name="remove_date_message">Remove %1$d items in this date.\n(This cannot be undone)</string>
 
     <string name="reset">Reset</string>
@@ -39,7 +39,11 @@
     <string name="close_search">Close Search</string>
 
     <string name="allow_keypad_prediction">Allow Keypad Prediction</string>
-    <string name="setting_secure">Hide screen on recent app list (require relaunch)</string>
+    <string name="setting_secure">Hide screen on recent app list</string>
+
+    <string name="label_separator">Shortcut label separator</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
 
     <string-array name="db_help">
         <item>Item click → Edit, Remove</item>

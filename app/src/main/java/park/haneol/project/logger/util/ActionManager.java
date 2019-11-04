@@ -86,7 +86,12 @@ public class ActionManager {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onClickLogItem(final int position, View anchor) {
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
+        if (item == null) {
+            return;
+        }
         int[] titleRes = {
+                item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
                 R.string.edit,
                 R.string.remove
         };
@@ -95,9 +100,12 @@ public class ActionManager {
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case 0:
-                        onClickEdit(position);
+                        onClickHighlight(position);
                         return true;
                     case 1:
+                        onClickEdit(position);
+                        return true;
+                    case 2:
                         onClickRemove(position);
                         return true;
                 }
@@ -115,8 +123,7 @@ public class ActionManager {
         }
         int[] titleRes = {
                 R.string.copy,
-                R.string.share,
-                item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight
+                R.string.share
         };
         popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -127,9 +134,6 @@ public class ActionManager {
                         return true;
                     case 1:
                         share(item.getText());
-                        return true;
-                    case 2:
-                        onClickHighlight(position);
                         return true;
                 }
                 return false;
@@ -146,7 +150,6 @@ public class ActionManager {
         }
         int[] titleRes = {
                 R.string.copy,
-                R.string.share,
                 R.string.remove
         };
         popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
@@ -157,9 +160,6 @@ public class ActionManager {
                         copy(getDateSpan(item, position + 1));
                         return true;
                     case 1:
-                        share(getDateSpan(item, position + 1));
-                        return true;
-                    case 2:
                         onClickDateRemove(position);
                         return true;
                 }
@@ -184,7 +184,7 @@ public class ActionManager {
                         onClickSetting();
                         return true;
                     case 1:
-                        onClickBackup();
+                        exportFullBackupFile();
                         return true;
                     case 2:
                         onClickCreateShortcut();
@@ -323,9 +323,14 @@ public class ActionManager {
             }
         });
 
-        // 날짜 형식
-        final EditText editText = contentView.findViewById(R.id.setting_date_format);
-        editText.setText(PrefUtil.dateFormat);
+        // 날짜 형식 버튼
+        Button dateFormatChangeButton = contentView.findViewById(R.id.setting_button_date_format_change);
+        dateFormatChangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickDateFormatChange();
+            }
+        });
 
         // 키패드 예측
         if (Build.VERSION.SDK_INT >= 19) {
@@ -336,6 +341,12 @@ public class ActionManager {
         // 화면 보안
         final CheckBox screenSecure = contentView.findViewById(R.id.setting_secure);
         screenSecure.setChecked(PrefUtil.getIsScreenSecure(main));
+
+        // 라벨 구분자
+        final EditText editTextLabelLeft = contentView.findViewById(R.id.setting_label_separator_left);
+        editTextLabelLeft.setText(PrefUtil.getLabelSeparatorLeft(main));
+        final EditText editTextLabelRight = contentView.findViewById(R.id.setting_label_separator_right);
+        editTextLabelRight.setText(PrefUtil.getLabelSeparatorRight(main));
 
         // 다이얼로그
         AlertDialog dialog = new AlertDialog.Builder(main)
@@ -354,12 +365,6 @@ public class ActionManager {
                             undoItem.clear();
                         }
 
-                        // 날짜 형식
-                        if (!editText.getText().toString().equals(PrefUtil.dateFormat)) {
-                            PrefUtil.setDateFormat(main, editText.getText().toString());
-                            main.mAdapter.notifyDataSetChanged();
-                        }
-
                         // 키패드 예측
                         if (Build.VERSION.SDK_INT >= 19) {
                             CheckBox checkBox = contentView.findViewById(R.id.setting_allow_keypad_prediction);
@@ -372,6 +377,42 @@ public class ActionManager {
                             main.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
                         } else {
                             main.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                        }
+
+                        // 라벨 구분자
+                        PrefUtil.setLabelSeparatorLeft(main, editTextLabelLeft.getText().toString());
+                        PrefUtil.setLabelSeparatorRight(main, editTextLabelRight.getText().toString());
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        UIUtil.isPopupEditing = false;
+                    }
+                })
+                .create();
+        dialog.show();
+        UIUtil.isPopupEditing = true;
+    }
+
+    private void onClickDateFormatChange() {
+        final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout_date_format, main.mRootLayout, false);
+
+        // 날짜 형식
+        final EditText editText = contentView.findViewById(R.id.setting_date_format);
+        editText.setText(PrefUtil.dateFormat);
+
+        // 다이얼로그
+        AlertDialog dialog = new AlertDialog.Builder(main)
+                .setView(contentView)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 날짜 형식
+                        if (!editText.getText().toString().equals(PrefUtil.dateFormat)) {
+                            PrefUtil.setDateFormat(main, editText.getText().toString());
+                            main.mAdapter.notifyDataSetChanged();
                         }
                     }
                 })
@@ -388,28 +429,10 @@ public class ActionManager {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void onClickBackup() {
-        final String path = main.getString(R.string.app_name) + " (" + TimeUtil.getDefaultDateFormat(TimeUtil.getCurrentTime()) + ").txt";
-        AlertDialog dialog = new AlertDialog.Builder(main)
-                .setTitle(R.string.backup)
-                .setMessage(main.getString(R.string.backup_message))
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        exportFullBackupFile(path);
-                    }
-                })
-                .create();
-        dialog.show();
-    }
-
-
-    // todo 검색 체크박스 추가
     private void onClickCreateShortcut() {
         // Make Content View
         final EditText editText = new EditText(main);
-        editText.setHint(R.string.hint_default);
+        editText.setHint(R.string.hint_label);
         editText.requestFocus();
 
         // Make Dialog
@@ -449,20 +472,20 @@ public class ActionManager {
         UIUtil.isPopupEditing = true;
     }
 
-    private void createShortcut(String defaultText) {
+    private void createShortcut(String label) {
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(main)) {
-            String shortLabel = defaultText.length() >= 10 ? defaultText.substring(0, 10) : defaultText; // 10자
-            String longLabel = defaultText.length() >= 25 ? defaultText.substring(0, 25) : defaultText; // 25자
+            String shortLabel = label.length() >= 10 ? label.substring(0, 10) : label; // 10자
+            String longLabel = label.length() >= 25 ? label.substring(0, 25) : label; // 25자
             Intent intent = new Intent(main, ShortcutActivity.class);
             intent.setAction(Intent.ACTION_DEFAULT);
-            intent.putExtra(ShortcutActivity.EXTRA_DEFAULT_TEXT, defaultText);
+            intent.putExtra(ShortcutActivity.EXTRA_SHORTCUT_LABEL, label);
             intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-            if (defaultText.length() == 0) {
+            if (label.length() == 0) {
                 shortLabel = main.getString(R.string.shortcut_name);
                 longLabel = main.getString(R.string.shortcut_name);
             }
-            ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(main, "logger_shortcut_"+defaultText)
+            ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(main, "logger_shortcut_"+label)
                     .setShortLabel(shortLabel)
                     .setLongLabel(longLabel)
                     .setIcon(IconCompat.createWithResource(main, R.mipmap.ic_launcher))
@@ -615,7 +638,8 @@ public class ActionManager {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void exportFullBackupFile(String path) {
+    private void exportFullBackupFile() {
+        final String path = main.getString(R.string.app_name) + " (" + TimeUtil.getDefaultDateFormat(TimeUtil.getCurrentTime()) + ").txt";
         File file = new File(main.getCacheDir(), path);
         try {
             FileWriter writer = new FileWriter(file);
