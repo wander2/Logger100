@@ -22,7 +22,8 @@ public class Database extends SQLiteOpenHelper {
 
     private Context context;
 
-    private static final String DATABASE_NAME  = "logger.db";
+    public static final String DATABASE_NAME  = "logger.db";
+    public static final String DATABASE_NAME_HIDDEN  = "logger_hidden.db";
     private static final int DATABASE_VERSION  = 42;
 
     private static final String TABLE_LOG_LIST = "log_list";
@@ -31,8 +32,8 @@ public class Database extends SQLiteOpenHelper {
     private static final String COL_LOG        = "log";
     private static final String COL_FLAG       = "flag";
 
-    public Database(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    public Database(Context context, String name) {
+        super(context, name, null, DATABASE_VERSION);
         this.context = context;
     }
 

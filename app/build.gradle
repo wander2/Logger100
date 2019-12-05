@@ -6,8 +6,8 @@ android {
         applicationId "park.haneol.project.logger"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 127
-        versionName "127-191104"
+        versionCode 128
+        versionName "128-19----"
     }
     buildTypes {
         release {
@@ -23,6 +23,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 }

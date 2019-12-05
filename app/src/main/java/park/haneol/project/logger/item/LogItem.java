@@ -9,6 +9,10 @@ public class LogItem extends BaseItem {
     private String text;
     private int flag;
 
+    public LogItem() {
+
+    }
+
     public LogItem(int id, int time, String text) {
         this(id, time, text, 0);
     }

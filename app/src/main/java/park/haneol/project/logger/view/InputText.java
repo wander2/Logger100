@@ -19,5 +19,4 @@ public class InputText extends AppCompatEditText {
         super(context, attrs, defStyleAttr);
     }
 
-
 }

@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".component.HiddenActivity"
+            android:theme="@style/HiddenTheme"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="stateVisible"/>
+        <activity
             android:name=".component.MainActivity"
             android:configChanges="orientation|keyboardHidden"
             android:launchMode="singleInstance"
@@ -20,7 +25,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -45,10 +50,11 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <activity android:name=".component.ShortcutActivity"
-            android:theme="@style/DialogTheme"
-            android:exported="true">
-        </activity>
+        <activity
+            android:name=".component.ShortcutActivity"
+            android:exported="true"
+            android:theme="@style/DialogTheme" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

@@ -35,7 +35,7 @@ public class ShareActivity extends Activity {
             String text = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (text != null) {
 
-                Database database = new Database(this);
+                Database database = new Database(this, Database.DATABASE_NAME);
                 LogItem item = database.insert(text);
 
                 MainActivity activity = ActivityObserver.getInstance().getActivity();

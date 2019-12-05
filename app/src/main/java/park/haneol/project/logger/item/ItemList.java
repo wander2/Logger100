@@ -37,7 +37,7 @@ public class ItemList extends ArrayList<BaseItem> {
         if (lastItem instanceof LogItem) {
             return (LogItem) lastItem;
         }
-        return null;
+        return new LogItem();
     }
 
     public int getNextSearchPosition(int focusPosition, String searchString) {

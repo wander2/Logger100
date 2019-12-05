@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="hidden">Hidden</string>
+    <string name="change_password">Change password</string>
+
     <string name="app_name">Logger</string>
     <string name="shortcut_name">Quick Log</string>
 
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
     <string name="remove_highlight">Remove Highlight</string>
+    <string name="remove_all">Remove All</string>
     <string name="highlight">Highlight</string>
 
     <string name="copy">Copy</string>
+    <string name="copy_all">Copy All</string>
     <string name="share">Share</string>
     <string name="add">Add</string>
 
@@ -26,7 +31,7 @@
     <string name="shortcut">Create shortcut</string>
 
     <string name="copy_message">Copied to clipboard.</string>
-    <string name="saved_message">Text saved in Logger.</string>
+    <string name="saved_message">Text is Saved.</string>
     <string name="remove_date_message">Remove %1$d items in this date.\n(This cannot be undone)</string>
 
     <string name="reset">Reset</string>
@@ -46,13 +51,13 @@
     <string name="right">Right</string>
 
     <string-array name="db_help">
-        <item>Item click → Edit, Remove</item>
-        <item>Item long press → Highlight, Copy, Share</item>
-        <item>Date long press → Remove, Copy, Share (All memo in that date)</item>
+        <item>Item click → Highlight, Edit, Remove</item>
+        <item>Item long press → Copy, Share</item>
+        <item>Date long press → Remove, Copy (All memo in that date)</item>
         <item>Zoom in/out → Font size change</item>
         <item>You can save text from another app by sharing to this app.</item>
         <item>You can toggle save-mode and search-mode by long-pressing the right bottom button.</item>
-        <item>You can create Quick Log shortcut at the home screen. (Top right Menu - Create shortcut)</item>
+        <item>You can create QuickLog shortcut at the home screen. (Top right Menu - Create shortcut)</item>
     </string-array>
 
     <string name="patch_note">[Update]\n1. Setting-Hide screen on recent app list\n2. Quick Log shortcut (Menu-Create shortcut)\n - Quick Log shortcut will be created at the home screen.</string>
@@ -132,7 +137,7 @@
     {wf} = from    {wt} = to
     -->
 
-    <string name="help_predict_keypad">"* Keypad prediction helps app start smoother.\n* It may not work properly under certain circumstances."</string>
+    <string name="help_predict_keypad">"* Keypad prediction helps app start smoother.\n* If not natural, please turn off this option."</string>
     <!--
     * Keypad prediction helps app start smoother.
     * It may not work properly under certain circumstances.

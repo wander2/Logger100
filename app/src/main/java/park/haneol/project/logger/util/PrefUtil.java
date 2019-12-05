@@ -228,4 +228,17 @@ public class PrefUtil {
     }
 
 
+
+
+
+    private static final String KEY_HIDDEN_PASSWORD = "hidden_password";
+
+    public static String getHiddenPassword(Context context) {
+        return getPref(context).getString(KEY_HIDDEN_PASSWORD, "");
+    }
+
+    public static void setHiddenPassword(Context context, String password) {
+        getPref(context).edit().putString(KEY_HIDDEN_PASSWORD, password).apply();
+    }
+
 }

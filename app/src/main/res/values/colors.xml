@@ -4,6 +4,8 @@
     <color name="colorAccentTransparent">#800091ea</color>
     <color name="colorWindowBackground">#80000000</color>
 
+    <color name="colorHidden">#414141</color>
+
     <color name="colorBackground">#222222</color>
     <color name="w_colorBackground">#ffffff</color>
 

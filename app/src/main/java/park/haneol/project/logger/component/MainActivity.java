@@ -57,9 +57,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean isSearchMode = false;
     private boolean modeSwitch = false;
 
+    // 기본 0, 비밀진입 1, 비밀 2
+    public static int mode = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         // 화면 보안
         if (PrefUtil.getIsScreenSecure(this)) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
@@ -114,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         ColorUtil.applyColor(this);
 
         // 데이터베이스, 어댑터 등 설정
-        mDatabase = new Database(this);
+        mDatabase = new Database(this, Database.DATABASE_NAME);
         mAdapter = mRecView.adapter;
         mAdapter.setItemList(mDatabase.load());
         mAdapter.update(isSearchMode);
@@ -307,6 +311,11 @@ public class MainActivity extends AppCompatActivity {
             }
             UIUtil.setKeypadShown(getWindow(), UIUtil.keypadShown);
             UIUtil.predictMargin(mRootLayout, false);
+        }
+        if (isFinishing()) {
+            if (mInputText.getText() != null && mInputText.getText().length() != 0) {
+                mDatabase.insert(mInputText.getText().toString());
+            }
         }
         super.onStop();
     }

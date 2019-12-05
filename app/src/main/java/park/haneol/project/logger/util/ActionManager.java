@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import park.haneol.project.logger.R;
+import park.haneol.project.logger.component.HiddenActivity;
 import park.haneol.project.logger.component.MainActivity;
 import park.haneol.project.logger.component.ShortcutActivity;
 import park.haneol.project.logger.item.BaseItem;
@@ -149,8 +150,8 @@ public class ActionManager {
             return;
         }
         int[] titleRes = {
-                R.string.copy,
-                R.string.remove
+                R.string.copy_all,
+                R.string.remove_all
         };
         popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -174,7 +175,8 @@ public class ActionManager {
         int[] titleRes = {
                 R.string.setting,
                 R.string.backup,
-                R.string.shortcut
+                R.string.shortcut,
+                (main instanceof HiddenActivity) ? R.string.change_password : R.string.hidden
         };
         popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -188,6 +190,13 @@ public class ActionManager {
                         return true;
                     case 2:
                         onClickCreateShortcut();
+                        return true;
+                    case 3:
+                        if (main instanceof HiddenActivity) {
+                            onClickChangePassword();
+                        } else {
+                            onClickHidden();
+                        }
                         return true;
                 }
                 return false;
@@ -495,6 +504,71 @@ public class ActionManager {
             PendingIntent successCallback = PendingIntent.getBroadcast(main, 0, pinnedShortcutCallbackIntent, 0);
             ShortcutManagerCompat.requestPinShortcut(main, pinShortcutInfo, successCallback.getIntentSender());
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void onClickHidden() {
+        main.startActivity(new Intent(main, HiddenActivity.class));
+    }
+
+    private void onClickChangePassword() {
+        if (HiddenActivity.mode != 2) {
+            // todo : 비밀번호를 먼저 입력해주세요.
+            Toast.makeText(main, "비밀번호를 먼저 입력해주세요.", Toast.LENGTH_SHORT).show();
+        } else {
+            final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout_hidden, main.mRootLayout, false);
+            final EditText editText = contentView.findViewById(R.id.password_after);
+
+            final AlertDialog dialog = new AlertDialog.Builder(main)
+                    .setTitle(R.string.change_password)
+                    .setView(contentView)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.confirm, null)
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            UIUtil.isPopupEditing = false;
+                            UIUtil.hideSoftInput(main.mInputText);
+                        }
+                    })
+                    .create();
+            dialog.show();
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    UIUtil.hideSoftInput(main.mInputText);
+                    if (editText.getText() != null) {
+                        String afterPassword = editText.getText().toString();
+                        onClickPasswordChangeConfirm(dialog, afterPassword);
+                    }
+                }
+            });
+            // 키패드 올리기
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            }
+            UIUtil.isPopupEditing = true;
+        }
+    }
+
+    private void onClickPasswordChangeConfirm(final AlertDialog baseDialog, final String afterPassword) {
+        // todo : 확실합니까? + 뭐뭐로 바꾸는 데에...
+        AlertDialog dialog = new AlertDialog.Builder(main)
+                .setTitle(R.string.change_password)
+                .setMessage("확실합니까? "+afterPassword)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        PrefUtil.setHiddenPassword(main, afterPassword);
+                        baseDialog.dismiss();
+                        // todo : 텍스트
+                        Toast.makeText(main, "비밀번호가 변경되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .create();
+        dialog.show();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

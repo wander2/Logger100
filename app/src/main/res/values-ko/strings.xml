@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="hidden">숨긴 기록</string>
+    <string name="change_password">비밀번호 변경</string>
+
     <string name="app_name">기록장</string>
     <string name="shortcut_name">빠른기록</string>
 
     <string name="edit">수정</string>
     <string name="remove">삭제</string>
     <string name="remove_highlight">강조 해제</string>
+    <string name="remove_all">전체 삭제</string>
     <string name="highlight">강조</string>
 
     <string name="copy">복사</string>
+    <string name="copy_all">전체 복사</string>
     <string name="share">공유</string>
     <string name="add">추가</string>
 
@@ -26,7 +31,7 @@
     <string name="shortcut">바로가기 생성</string>
 
     <string name="copy_message">클립보드에 복사되었습니다.</string>
-    <string name="saved_message">기록장에 저장되었습니다.</string>
+    <string name="saved_message">저장되었습니다.</string>
     <string name="remove_date_message">이 날짜에 있는 %1$d개 메모를 삭제합니다.\n(되돌릴 수 없습니다)</string>
 
     <string name="reset">초기화</string>
@@ -46,12 +51,12 @@
     <string name="right">오른쪽</string>
 
     <string-array name="db_help">
-        <item>메모 클릭 → 수정, 삭제</item>
-        <item>메모 길게 누르기 → 강조, 복사, 공유</item>
-        <item>날짜 길게 누르기 → 삭제, 복사, 공유 (해당 날짜의 모든 메모)</item>
+        <item>메모 클릭 → 강조, 수정, 삭제</item>
+        <item>메모 길게 누르기 → 복사, 공유</item>
+        <item>날짜 길게 누르기 → 해당 날짜의 모든 메모 전체 삭제, 전체 복사</item>
         <item>두 손가락으로 줌인/줌아웃 → 글자 크기 변경</item>
-        <item>다른 어플에서 텍스트를 공유하여 이 어플에 저장할 수 있습니다.</item>
-        <item>저장 버튼을 길게 누르면 저장모드와 검색모드를 변경할 수 있습니다.</item>
+        <item>다른 어플에서 텍스트를 공유하여 기록장에 저장할 수 있습니다.</item>
+        <item>저장 버튼을 길게 누르면 검색모드로 변경할 수 있습니다.</item>
         <item>홈 화면에 빠른기록 바로가기를 생성할 수 있습니다. (오른쪽 위 메뉴 - 바로가기 생성)</item>
     </string-array>
 
@@ -129,7 +134,7 @@
     {wf} = 부터 {wt} = 까지
     -->
 
-    <string name="help_predict_keypad">"* 키패드 예측을 켜면 앱 실행이 조금 더 부드러워집니다.\n* 특정 상황에서 제대로 동작하지 않을 수 있습니다."</string>
+    <string name="help_predict_keypad">"* 키패드의 크기를 예측하여 조금 더 부드럽게 실행합니다.\n* 만약 부자연스럽다면 이 옵션을 꺼주세요."</string>
     <!--
     * 키패드 예측을 켜면 앱 실행이 조금 더 부드러워집니다.
     * 특정 상황에서 제대로 동작하지 않을 수 있습니다.
