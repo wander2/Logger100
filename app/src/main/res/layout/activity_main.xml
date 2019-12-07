@@ -31,6 +31,7 @@
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="4"
         android:textSize="20dp"
+        android:textColorHint="@color/colorHidden"
         android:nextFocusForward="@id/edit_text"
         android:nextFocusDown="@id/edit_text"
         android:nextFocusLeft="@id/edit_text"

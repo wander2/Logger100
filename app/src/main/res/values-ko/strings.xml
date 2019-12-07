@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hidden">숨긴 기록</string>
+    <string name="msg_password_changed">비밀번호가 변경되었습니다.</string>
+    <string name="msg_password_changing">"%s로 비밀번호를 변경합니다.\n(잊어버리면 앱 데이터를 초기화해야 합니다.)"</string>
+    <string name="msg_password_first">비밀번호를 입력해주세요.</string>
+    <string name="msg_password_not">비밀번호가 일치하지 않습니다.</string>
+
+    <string name="move_hidden_return">숨김 해제</string>
+    <string name="move_hidden">숨김</string>
+    <string name="hidden">비밀 기록</string>
     <string name="change_password">비밀번호 변경</string>
 
     <string name="app_name">기록장</string>
@@ -51,16 +58,19 @@
     <string name="right">오른쪽</string>
 
     <string-array name="db_help">
-        <item>메모 클릭 → 강조, 수정, 삭제</item>
-        <item>메모 길게 누르기 → 복사, 공유</item>
-        <item>날짜 길게 누르기 → 해당 날짜의 모든 메모 전체 삭제, 전체 복사</item>
-        <item>두 손가락으로 줌인/줌아웃 → 글자 크기 변경</item>
-        <item>다른 어플에서 텍스트를 공유하여 기록장에 저장할 수 있습니다.</item>
-        <item>저장 버튼을 길게 누르면 검색모드로 변경할 수 있습니다.</item>
-        <item>홈 화면에 빠른기록 바로가기를 생성할 수 있습니다. (오른쪽 위 메뉴 - 바로가기 생성)</item>
+        <item>메모를 클릭하거나 길게 클릭해보세요.</item>
+        <item>두 손가락으로 줌인하거나 줌아웃 해보세요.</item>
+        <item>저장 버튼을 길게 클릭하면 검색모드로 들어갑니다.\n검색 버튼을 클릭하면 검색 결과를 밑에서부터 탐색합니다.</item>
+        <item>다른 어플에서 텍스트를 공유해서 기록장에 저장할 수 있습니다.</item>
+        <item>메뉴 - 비밀 기록을 누르면 별도의 창으로 이동합니다.\n비밀 기록의 기본 비밀번호는 없습니다. (바로 확인 클릭)</item>
+        <item>날짜를 길게 클릭해서 도움말을 모두 삭제해보세요.</item>
     </string-array>
 
-    <string name="patch_note">[업데이트]\n1. 설정-최근 앱 목록에서 화면 숨김 기능 추가\n2. 빠른기록 바로가기 기능 추가 (메뉴-바로가기 생성)\n - 홈 화면에 빠른기록 바로가기가 생성됩니다.</string>
+    <string-array name="db_help_hidden">
+        <item>메뉴에서 비밀번호를 변경해주세요.</item>
+    </string-array>
+
+    <string name="patch_note">[업데이트]\n비밀 기록 기능이 추가되었습니다. (메뉴에서 확인)</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>일</item>
@@ -134,7 +144,7 @@
     {wf} = 부터 {wt} = 까지
     -->
 
-    <string name="help_predict_keypad">"* 키패드의 크기를 예측하여 조금 더 부드럽게 실행합니다.\n* 만약 부자연스럽다면 이 옵션을 꺼주세요."</string>
+    <string name="help_predict_keypad">"* 키패드의 크기를 예측하여 조금 더 부드럽게 실행합니다.\n* 부자연스럽게 작동한다면 이 옵션을 꺼주세요."</string>
     <!--
     * 키패드 예측을 켜면 앱 실행이 조금 더 부드러워집니다.
     * 특정 상황에서 제대로 동작하지 않을 수 있습니다.

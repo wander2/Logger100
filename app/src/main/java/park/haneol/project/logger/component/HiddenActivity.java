@@ -1,16 +1,19 @@
 package park.haneol.project.logger.component;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import park.haneol.project.logger.R;
+import park.haneol.project.logger.item.LogItem;
 import park.haneol.project.logger.util.ActivityObserver;
 import park.haneol.project.logger.util.Database;
 import park.haneol.project.logger.util.PrefUtil;
-
-// todo : 비밀 기능 추가 help 설명
+import park.haneol.project.logger.util.UIUtil;
 
 // 1. 입력창 외에 아무 것도 안 나옴 (버튼:"확인")
 // 2. 메뉴는 약간 변경됨 : 비밀 모드 진입 -> 비밀번호 변경 (비밀번호 입력하고 들어왔을 경우에만 유효)
@@ -40,6 +43,9 @@ public class HiddenActivity extends MainActivity {
             mAdapter.setItemList(null);
             mAdapter.update(isSearchMode);
 
+            // 입력창 초기화
+            mInputText.setHint(R.string.msg_password_first);
+
             // 버튼 초기화
             mSaveButton.setText(R.string.confirm);
             final View.OnClickListener ocl = mSaveButton.getOnClickListener();
@@ -56,6 +62,9 @@ public class HiddenActivity extends MainActivity {
                             mSaveButton.setOnClickListener(ocl);
                             mSaveButton.setOnLongClickListener(olcl);
 
+                            // 입력창 되돌림
+                            mInputText.setHint(null);
+
                             // 데이터베이스, 어댑터 등 설정
                             mDatabase = new Database(HiddenActivity.this, Database.DATABASE_NAME_HIDDEN);
                             mAdapter.setItemList(mDatabase.load());
@@ -66,8 +75,7 @@ public class HiddenActivity extends MainActivity {
 
                             mode = 2;
                         } else {
-                            // todo : 비밀번호가 일치하지 않습니다.
-                            Toast.makeText(HiddenActivity.this, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(HiddenActivity.this, R.string.msg_password_not, Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -76,6 +84,15 @@ public class HiddenActivity extends MainActivity {
 
         // 객체 보존 취소
         ActivityObserver.getInstance().setActivity(null);
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                UIUtil.keypadShown = false;
+                UIUtil.fitCount = 2;
+                UIUtil.predictMargin(mRootLayout, false);
+            }
+        });
     }
 
     @Override
@@ -84,5 +101,24 @@ public class HiddenActivity extends MainActivity {
         if (isFinishing()) {
             mode = 0;
         }
+    }
+
+    // 공유 받음
+    void onTextSavedFromOutside(LogItem item) {
+        // do nothing
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(this, MainActivity.class));
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                UIUtil.keypadShown = false;
+                UIUtil.fitCount = 2;
+                UIUtil.predictMargin(mRootLayout, false);
+            }
+        }, 500);
     }
 }

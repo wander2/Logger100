@@ -125,6 +125,11 @@ public class MainActivity extends AppCompatActivity {
         mActionManager = new ActionManager(this);
         mAdapter.setActionManager(mActionManager);
 
+        // 복원
+        String textPres = PrefUtil.getTextPreserved(this);
+        mInputText.setText(textPres);
+        mInputText.setSelection(textPres.length());
+
         // 입력창 초기화 (복원, 빠른검색)
         if (searchIntent) {
             String searchText = getIntent().getStringExtra(EXTRA_SEARCH_INTENT_TEXT);
@@ -312,10 +317,9 @@ public class MainActivity extends AppCompatActivity {
             UIUtil.setKeypadShown(getWindow(), UIUtil.keypadShown);
             UIUtil.predictMargin(mRootLayout, false);
         }
-        if (isFinishing()) {
-            if (mInputText.getText() != null && mInputText.getText().length() != 0) {
-                mDatabase.insert(mInputText.getText().toString());
-            }
+        Editable text = mInputText.getText();
+        if (text != null) {
+            PrefUtil.setTextPreserved(this, text.toString());
         }
         super.onStop();
     }

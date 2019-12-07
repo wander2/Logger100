@@ -241,4 +241,17 @@ public class PrefUtil {
         getPref(context).edit().putString(KEY_HIDDEN_PASSWORD, password).apply();
     }
 
+
+
+
+    private static final String KEY_TEXT_PRESERVED = "editTextPreserved";
+
+    public static String getTextPreserved(Context context) {
+        return getPref(context).getString(KEY_TEXT_PRESERVED, "");
+    }
+
+    public static void setTextPreserved(Context context, String text) {
+        getPref(context).edit().putString(KEY_TEXT_PRESERVED, text).apply();
+    }
+
 }

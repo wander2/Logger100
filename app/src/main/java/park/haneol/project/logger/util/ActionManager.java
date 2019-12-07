@@ -122,24 +122,51 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        int[] titleRes = {
-                R.string.copy,
-                R.string.share
-        };
-        popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case 0:
-                        copy(item.getText());
-                        return true;
-                    case 1:
-                        share(item.getText());
-                        return true;
+        if (main instanceof HiddenActivity) {
+            int[] titleRes = {
+                    R.string.copy,
+                    R.string.move_hidden_return
+
+            };
+            popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case 0:
+                            copy(item.getText());
+                            return true;
+                        case 1:
+                            onClickHideReturn(position);
+                            return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
+        } else {
+            int[] titleRes = {
+                    R.string.copy,
+                    R.string.share,
+                    R.string.move_hidden
+
+            };
+            popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case 0:
+                            copy(item.getText());
+                            return true;
+                        case 1:
+                            share(item.getText());
+                            return true;
+                        case 2:
+                            onClickHide(position);
+                            return true;
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,7 +524,7 @@ public class ActionManager {
             ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(main, "logger_shortcut_"+label)
                     .setShortLabel(shortLabel)
                     .setLongLabel(longLabel)
-                    .setIcon(IconCompat.createWithResource(main, R.mipmap.ic_launcher))
+                    .setIcon(IconCompat.createWithResource(main, R.mipmap.ic_shortcut))
                     .setIntent(intent)
                     .build();
             Intent pinnedShortcutCallbackIntent = ShortcutManagerCompat.createShortcutResultIntent(main, pinShortcutInfo);
@@ -510,61 +537,70 @@ public class ActionManager {
 
     private void onClickHidden() {
         main.startActivity(new Intent(main, HiddenActivity.class));
+        main.finish();
     }
 
     private void onClickChangePassword() {
         if (HiddenActivity.mode != 2) {
-            // todo : 비밀번호를 먼저 입력해주세요.
-            Toast.makeText(main, "비밀번호를 먼저 입력해주세요.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(main, R.string.msg_password_first, Toast.LENGTH_SHORT).show();
         } else {
-            final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout_hidden, main.mRootLayout, false);
-            final EditText editText = contentView.findViewById(R.id.password_after);
+            // Make Content View
+            final EditText editText = new EditText(main);
+            editText.requestFocus();
 
+            // Make Dialog
             final AlertDialog dialog = new AlertDialog.Builder(main)
                     .setTitle(R.string.change_password)
-                    .setView(contentView)
-                    .setNegativeButton(R.string.cancel, null)
+                    .setView(editText)
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            UIUtil.hideSoftInput(editText);
+                            UIUtil.hideSoftInput(main.mInputText);
+                        }
+                    })
                     .setPositiveButton(R.string.confirm, null)
                     .setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialog) {
                             UIUtil.isPopupEditing = false;
+                            UIUtil.hideSoftInput(editText);
                             UIUtil.hideSoftInput(main.mInputText);
                         }
                     })
                     .create();
+            dialog.setCanceledOnTouchOutside(false);
+
+            // 키패드 올리기
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            }
             dialog.show();
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UIUtil.hideSoftInput(main.mInputText);
                     if (editText.getText() != null) {
                         String afterPassword = editText.getText().toString();
                         onClickPasswordChangeConfirm(dialog, afterPassword);
                     }
                 }
             });
-            // 키패드 올리기
-            if (dialog.getWindow() != null) {
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-            }
+
             UIUtil.isPopupEditing = true;
         }
     }
 
     private void onClickPasswordChangeConfirm(final AlertDialog baseDialog, final String afterPassword) {
-        // todo : 확실합니까? + 뭐뭐로 바꾸는 데에...
         AlertDialog dialog = new AlertDialog.Builder(main)
                 .setTitle(R.string.change_password)
-                .setMessage("확실합니까? "+afterPassword)
+                .setMessage(main.getString(R.string.msg_password_changing, afterPassword))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         PrefUtil.setHiddenPassword(main, afterPassword);
                         baseDialog.dismiss();
-                        // todo : 텍스트
-                        Toast.makeText(main, "비밀번호가 변경되었습니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(main, R.string.msg_password_changed, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .create();
@@ -671,6 +707,35 @@ public class ActionManager {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private void onClickHide(int position) {
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
+        if (item == null) {
+            return;
+        }
+        main.mAdapter.removeItem(position);
+        main.mDatabase.delete(item.getId());
+        Database databaseHidden = new Database(main, Database.DATABASE_NAME_HIDDEN);
+        if (databaseHidden.existId(item.getId())) {
+            databaseHidden.insert(item.getText());
+        } else {
+            databaseHidden.insertOfItem(item);
+        }
+    }
+
+    private void onClickHideReturn(int position) {
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
+        if (item == null) {
+            return;
+        }
+        main.mAdapter.removeItem(position);
+        main.mDatabase.delete(item.getId());
+        Database databaseDefault = new Database(main, Database.DATABASE_NAME);
+        if (databaseDefault.existId(item.getId())) {
+            databaseDefault.insert(item.getText());
+        } else {
+            databaseDefault.insertOfItem(item);
+        }
+    }
 
 
 

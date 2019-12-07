@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hidden">Hidden</string>
+    <string name="msg_password_changed">Password is changed.</string>
+    <string name="msg_password_changing">"Changing password by %s.\n(If you forget this, clear app data.)"</string>
+    <string name="msg_password_first">Please enter the password.</string>
+    <string name="msg_password_not">Password is incorrect.</string>
+
+    <string name="move_hidden_return">Return</string>
+    <string name="move_hidden">Hide</string>
+    <string name="hidden">Hidden log</string>
     <string name="change_password">Change password</string>
 
     <string name="app_name">Logger</string>
@@ -51,16 +58,19 @@
     <string name="right">Right</string>
 
     <string-array name="db_help">
-        <item>Item click → Highlight, Edit, Remove</item>
-        <item>Item long press → Copy, Share</item>
-        <item>Date long press → Remove, Copy (All memo in that date)</item>
-        <item>Zoom in/out → Font size change</item>
-        <item>You can save text from another app by sharing to this app.</item>
-        <item>You can toggle save-mode and search-mode by long-pressing the right bottom button.</item>
-        <item>You can create QuickLog shortcut at the home screen. (Top right Menu - Create shortcut)</item>
+        <item>Try clicking or long-clicking the item.</item>
+        <item>You can zoom in or zoom out.</item>
+        <item>You can toggle search mode by long-pressing the save button.\nSearch button searches the matched items from bottom.</item>
+        <item>You can save text from another app by sharing.</item>
+        <item>Menu - Hidden log : default password is nothing. (Click confirm button)</item>
+        <item>Delete all help messages by long-clicking the date.</item>
     </string-array>
 
-    <string name="patch_note">[Update]\n1. Setting-Hide screen on recent app list\n2. Quick Log shortcut (Menu-Create shortcut)\n - Quick Log shortcut will be created at the home screen.</string>
+    <string-array name="db_help_hidden">
+        <item>Please change your password from the menu.</item>
+    </string-array>
+
+    <string name="patch_note">[Update]\nHidden log function is added. (check the menu)</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>Sun</item>

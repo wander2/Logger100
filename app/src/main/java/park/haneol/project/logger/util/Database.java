@@ -44,7 +44,11 @@ public class Database extends SQLiteOpenHelper {
                 COL_TIME   + " INTEGER," +
                 COL_LOG    + " TEXT," +
                 COL_FLAG   + " INTEGER DEFAULT 0)");
-        insertHelp(db, context.getResources().getStringArray(R.array.db_help));
+        if (getDatabaseName().equals(DATABASE_NAME_HIDDEN)) {
+            insertHelp(db, context.getResources().getStringArray(R.array.db_help_hidden));
+        } else {
+            insertHelp(db, context.getResources().getStringArray(R.array.db_help));
+        }
     }
 
     @Override
@@ -54,7 +58,7 @@ public class Database extends SQLiteOpenHelper {
                     " ADD COLUMN " + COL_FLAG + " INTEGER DEFAULT 0");
             clearPrefData48(db);
         }
-        if (oldVersion < DATABASE_VERSION) {
+        if (oldVersion < DATABASE_VERSION && getDatabaseName().equals(DATABASE_NAME)) {
             insertNote(db, context.getString(R.string.patch_note));
         }
     }
@@ -72,7 +76,7 @@ public class Database extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COL_TIME, TimeUtil.getCurrentTime());
         values.put(COL_LOG, string);
-        values.put(COL_FLAG, 1);
+        values.put(COL_FLAG, 0);
         db.insert(TABLE_LOG_LIST, null, values);
     }
 
@@ -162,6 +166,14 @@ public class Database extends SQLiteOpenHelper {
         for (Integer logId: idList) {
             db.delete(TABLE_LOG_LIST, COL_LOG_ID + "=?", iArg(logId));
         }
+    }
+
+    boolean existId(int logId) {
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.query(TABLE_LOG_LIST, null, COL_LOG_ID + "=?", iArg(logId), null, null, null);
+        boolean isExist = cursor.getCount() != 0;
+        cursor.close();
+        return isExist;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
