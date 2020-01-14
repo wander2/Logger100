@@ -41,14 +41,22 @@ public class TimeUtil {
         return (time + PrefUtil.timeZoneOffset) / 1440;
     }
 
-    private static int getLocalTime(int time) {
+    static int getLocalDayMinutes(int time) {
         return (time + PrefUtil.timeZoneOffset) % 1440;
     }
 
+    static int toSystemTime(int[] date, int[] hm) {
+        return getDays(date[0], date[1], date[2]) * 1440 + hm[0] * 60 + hm[1] - PrefUtil.timeZoneOffset;
+    }
+
     public static String getTimeString(int time) {
-        int localTime = getLocalTime(time);
-        int h = localTime / 60;
-        int m = localTime % 60;
+        int localDayMinutes = getLocalDayMinutes(time);
+        int h = localDayMinutes / 60;
+        int m = localDayMinutes % 60;
+        return getTimeString(h, m);
+    }
+
+    static String getTimeString(int h, int m) {
         StringBuilder sb = new StringBuilder();
         if (h < 10) sb.append(' '); sb.append(h); sb.append(':');
         if (m < 10) sb.append('0'); sb.append(m); sb.append(' ');
@@ -56,7 +64,16 @@ public class TimeUtil {
     }
 
     public static Spannable getDateString(int time) {
-        final int[] each = getEach(time);
+        int[] each = getEach(time);
+        return getDateStringFromEach(each);
+    }
+
+    static Spannable getDateStringFromDays(int days) {
+        int[] each = getEachFromDays(days);
+        return getDateStringFromEach(each);
+    }
+
+    private static Spannable getDateStringFromEach(int[] each) {
         final int year = each[0];
         final int month = each[1];
         final int days = each[2];
@@ -75,20 +92,6 @@ public class TimeUtil {
                 .replace("{_D}", String.format(Locale.ENGLISH, "%1$2s", days))
                 .replace("{D}", String.valueOf(days))
                 .replace("{n}", "\n");
-        /*
-        int weekStart; int weekEnd = -1;
-        if ((weekStart = dateString.indexOf("{DDDD}")) != -1) {
-            weekEnd = weekStart + df_week[week].toUpperCase().length();
-        } else if ((weekStart = dateString.indexOf("{dddd}")) != -1) {
-            weekEnd = weekStart + df_week[week].length();
-        } else if ((weekStart = dateString.indexOf("{DDD}")) != -1) {
-            weekEnd = weekStart + df_week_short[week].toUpperCase().length();
-        } else if ((weekStart = dateString.indexOf("{ddd}")) != -1) {
-            weekEnd = weekStart + df_week_short[week].length();
-        } else if ((weekStart = dateString.indexOf("{W}")) != -1) {
-            weekEnd = weekStart + df_week_han[week].length();
-        }
-        */
         dateString = dateString
                 .replace("{DDDD}", df_week[week].toUpperCase())
                 .replace("{dddd}", df_week[week])
@@ -111,17 +114,30 @@ public class TimeUtil {
         final int[] each = getEach(time);
         final int year = each[0];
         final int month = each[1];
-        final int days = each[2];
+        final int dayOfMonth = each[2];
         final int week = each[3];
-        return year + "-" + month + "-" + days + " " + df_week_short[week].toUpperCase();
+        return year + "-" + month + "-" + dayOfMonth + " (" + df_week_short[week].toUpperCase() + ")";
+    }
+
+    static String getDefaultDateFormatFromDays(int days) {
+        final int[] each = getEachFromDays(days);
+        final int year = each[0];
+        final int month = each[1];
+        final int dayOfMonth = each[2];
+        final int week = each[3];
+        return year + "-" + month + "-" + dayOfMonth + " (" + df_week_short[week].toUpperCase() + ")";
     }
 
     private static int getWeek(int days) {
         return (days + 4) % 7;
     }
 
-    private static int[] getEach(int time) {
+    static int[] getEach(int time) {
         int days = getLocalDays(time);
+        return getEachFromDays(days);
+    }
+
+    static int[] getEachFromDays(int days) {
         int week = getWeek(days);
         int year = 1970;
         int yearDays;
@@ -151,6 +167,25 @@ public class TimeUtil {
         }
         days++; // 거리 0일 -> 명칭 1일
         return new int[] {year, month, days, week};
+    }
+
+    // get days from int[] of local date
+    static int getDays(int year, int month, int dayOfMonth) {
+        int days = 0; // 1970. 1. 1.
+        for (int y = 1970; y < year; y++) {
+            days += isLeapYear(y) ? 366 : 365;
+        }
+        if (isLeapYear(year)) {
+            for (int m = 0; m < month - 1; m++) {
+                days += MONTH_DAYS_LEAP[m];
+            }
+        } else {
+            for (int m = 0; m < month - 1; m++) {
+                days += MONTH_DAYS_NORMAL[m];
+            }
+        }
+        days += dayOfMonth - 1;
+        return days;
     }
 
     static String getUTC() {

@@ -15,13 +15,14 @@
 
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
-    <string name="remove_highlight">Remove Highlight</string>
-    <string name="remove_all">Remove All</string>
+    <string name="remove_highlight">Remove highlight</string>
+    <string name="remove_all">Remove all</string>
     <string name="highlight">Highlight</string>
 
     <string name="copy">Copy</string>
-    <string name="copy_all">Copy All</string>
+    <string name="copy_all">Copy all</string>
     <string name="share">Share</string>
+    <string name="share_all">Share all</string>
     <string name="add">Add</string>
 
     <string name="cancel">Cancel</string>
@@ -38,7 +39,7 @@
     <string name="shortcut">Create shortcut</string>
 
     <string name="copy_message">Copied to clipboard.</string>
-    <string name="saved_message">Text is Saved.</string>
+    <string name="saved_message">Text is saved.</string>
     <string name="remove_date_message">Remove %1$d items in this date.\n(This cannot be undone)</string>
 
     <string name="reset">Reset</string>
@@ -57,20 +58,22 @@
     <string name="left">Left</string>
     <string name="right">Right</string>
 
+    <string name="change_time">Change Time</string>
+
     <string-array name="db_help">
-        <item>Try clicking or long-clicking the item.</item>
-        <item>You can zoom in or zoom out.</item>
-        <item>You can toggle search mode by long-pressing the save button.\nSearch button searches the matched items from bottom.</item>
-        <item>You can save text from another app by sharing.</item>
-        <item>Menu - Hidden log : default password is nothing. (Click confirm button)</item>
-        <item>Delete all help messages by long-clicking the date.</item>
+        <item>Try click or long-press a item.</item>
+        <item>You can zoom in/zoom out with two finger.</item>
+        <item>You can toggle search mode by long-pressing save button.\nSearch button searches the matched items from bottom.</item>
+        <item>You can share text from another app to this app.</item>
+        <item>Try long-press a date item.</item>
+        <item>Menu - Hidden log : default password is nothing. (Just click confirm button)</item>
     </string-array>
 
     <string-array name="db_help_hidden">
         <item>Please change your password from the menu.</item>
     </string-array>
 
-    <string name="patch_note">[Update]\nHidden log function is added. (check the menu)</string>
+    <string name="patch_note">[Update]\nYou can change date/time by clicking time(00:00) at the left of each item.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>Sun</item>

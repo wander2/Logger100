@@ -31,6 +31,12 @@ public class LogHolder extends BaseHolder {
         timeView = itemView.findViewById(R.id.textView_time);
         logView = itemView.findViewById(R.id.textView_log);
         anchorView = itemView.findViewById(R.id.view_anchor);
+        timeView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                actionManager.onClickTime(getAdapterPosition());
+            }
+        });
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

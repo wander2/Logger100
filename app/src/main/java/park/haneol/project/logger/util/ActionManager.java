@@ -1,5 +1,6 @@
 package park.haneol.project.logger.util;
 
+import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -19,8 +20,10 @@ import android.view.animation.Transformation;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -178,6 +181,7 @@ public class ActionManager {
         }
         int[] titleRes = {
                 R.string.copy_all,
+                R.string.share_all,
                 R.string.remove_all
         };
         popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
@@ -188,6 +192,9 @@ public class ActionManager {
                         copy(getDateSpan(item, position + 1));
                         return true;
                     case 1:
+                        share(getDateSpan(item, position + 1));
+                        return true;
+                    case 2:
                         onClickDateRemove(position);
                         return true;
                 }
@@ -229,6 +236,102 @@ public class ActionManager {
                 return false;
             }
         });
+    }
+
+    public void onClickTime(int position) {
+        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
+        if (item == null) {
+            return;
+        }
+
+        // 변수
+        int dayMinutes = TimeUtil.getLocalDayMinutes(item.getTime());
+        final int[] date = TimeUtil.getEach(item.getTime()); // 날짜 정보 저장 변수
+        final int[] hm = {dayMinutes / 60, dayMinutes % 60}; // 시간 정보 저장 변수
+
+        // 뷰
+        final View contentView = LayoutInflater.from(main).inflate(R.layout.time_change_layout, main.mRootLayout, false);
+        final Button dateChangeButton = contentView.findViewById(R.id.button_change_date);
+        final TimePicker timePicker = contentView.findViewById(R.id.picker_change_time);
+
+        // 날짜 변경 버튼
+        // 텍스트 초기화
+        dateChangeButton.setText(TimeUtil.getDateString(item.getTime()));
+        // 버튼 클릭시 나타날 것
+        final DatePickerDialog datePickerDialog = new DatePickerDialog(main,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        // 입력정보 -> 새 변수
+                        int days = TimeUtil.getDays(year, month + 1, dayOfMonth);
+                        int[] afterDate = TimeUtil.getEachFromDays(days);
+
+                        // 변수에 저장
+                        System.arraycopy(afterDate, 0, date, 0, 4);
+
+                        // 버튼 텍스트 변경
+                        dateChangeButton.setText(TimeUtil.getDateStringFromDays(days));
+                    }
+                },
+                date[0],date[1] - 1, date[2]);
+        // 최소 1970. 1. 2. (UTC 변경으로 인한 오류 방지) / 최대 현재시간
+        datePickerDialog.getDatePicker().setMinDate(86400000);
+        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+        // 클릭 이벤트 적용
+        dateChangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                datePickerDialog.show();
+            }
+        });
+
+        // 시간 선택기
+        // 24시간 설정
+        timePicker.setIs24HourView(true);
+        // 초기화
+        timePicker.setCurrentHour(hm[0]);
+        timePicker.setCurrentMinute(hm[1]);
+        // 변경 이벤트
+        timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+            @Override
+            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                // 시간 받아옴
+                hm[0] = hourOfDay;
+                hm[1] = minute;
+
+                // 시간이 현재시간보다 클 경우 현재시간으로 설정됨
+                int newTime = TimeUtil.toSystemTime(date, hm);
+                int currentTime = TimeUtil.getCurrentTime();
+                if (newTime > currentTime) {
+                    int currentDayMinutes = TimeUtil.getLocalDayMinutes(currentTime);
+                    hm[0] = currentDayMinutes / 60;
+                    hm[1] = currentDayMinutes % 60;
+                    view.setCurrentHour(hm[0]);
+                    view.setCurrentMinute(hm[1]);
+                }
+            }
+        });
+
+        // 다이얼로그
+        new AlertDialog.Builder(main)
+                .setTitle(R.string.change_time)
+                .setView(contentView)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int afterTime = TimeUtil.toSystemTime(date, hm);
+                        int[] betweenIds = main.mAdapter.timeInsertFindBetween(afterTime);
+                        int afterId = betweenIds[0] + 1;
+                        int pushUntilId = main.mAdapter.timeInsertFindPushUntil(betweenIds);
+                        main.mDatabase.changeItemTime(item.getId(), afterTime, afterId, pushUntilId);
+                        main.mAdapter.setItemList(main.mDatabase.load());
+                        main.mAdapter.update(main.isSearchMode);
+                        main.mRecView.scrollToItemPosition(main.mAdapter.getPositionById(afterId));
+                        undoItem.clear();
+                    }
+                })
+                .show();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

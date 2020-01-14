@@ -59,7 +59,7 @@ public class RecView extends RecyclerView {
         scrollToItemPosition(position, false);
     }
 
-    public void scrollToItemPosition(final int position, final boolean isLong) {
+    public void scrollToItemPosition(final int position, final boolean delayed) {
         if (position >= 0 && position < adapter.getItemCount()) {
             int extent = computeVerticalScrollExtent();
             if (extent == 0) {
@@ -67,24 +67,24 @@ public class RecView extends RecyclerView {
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        scrollToItemPosition(position, isLong);
+                        scrollToItemPosition(position, delayed);
                     }
                 }, 100);
             } else {
                 layoutManager.scrollToPositionWithOffset(position, extent/2);
-                startBlinkAnimation(position, isLong);
+                startBlinkAnimation(position, delayed);
             }
         }
     }
 
-    public void startBlinkAnimation(final int position, boolean isLong) {
+    public void startBlinkAnimation(final int position, boolean delayed) {
         final BlinkAnimation blinkAnimation = new BlinkAnimation();
         postDelayed(new Runnable() {
             @Override
             public void run() {
                 blinkAnimation.start(position);
             }
-        }, isLong ? blinkAnimation.DELAY_LONG : blinkAnimation.DELAY_SHORT);
+        }, delayed ? blinkAnimation.DELAY_LONG : blinkAnimation.DELAY_SHORT);
     }
 
     @Override

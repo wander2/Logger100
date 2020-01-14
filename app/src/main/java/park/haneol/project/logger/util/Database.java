@@ -24,7 +24,7 @@ public class Database extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME  = "logger.db";
     public static final String DATABASE_NAME_HIDDEN  = "logger_hidden.db";
-    private static final int DATABASE_VERSION  = 42;
+    private static final int DATABASE_VERSION  = 43;
 
     private static final String TABLE_LOG_LIST = "log_list";
     private static final String COL_LOG_ID     = "log_id";
@@ -76,7 +76,6 @@ public class Database extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COL_TIME, TimeUtil.getCurrentTime());
         values.put(COL_LOG, string);
-        values.put(COL_FLAG, 0);
         db.insert(TABLE_LOG_LIST, null, values);
     }
 
@@ -174,6 +173,40 @@ public class Database extends SQLiteOpenHelper {
         boolean isExist = cursor.getCount() != 0;
         cursor.close();
         return isExist;
+    }
+
+    void changeItemTime(int itemId, int afterTime, int afterId, int pushUntilId) {
+        SQLiteDatabase db = getWritableDatabase();
+        if (pushUntilId == -1) {
+            ContentValues values = new ContentValues();
+            values.put(COL_LOG_ID, afterId); // itemId -> afterId 로 변환
+            values.put(COL_TIME, afterTime); // itemId:time -> afterTime 으로 변환
+            db.update(TABLE_LOG_LIST, values, COL_LOG_ID + "=?", iArg(itemId));
+        } else {
+            db.beginTransaction();
+            try {
+                // 1
+                // afterId ~ pushUntilId-1    =>    afterId+1 ~ pushUntilId
+                ContentValues values = new ContentValues();
+                for (int i = pushUntilId - 1; i >= afterId; i--) {
+                    values.put(COL_LOG_ID, i + 1); // id++
+                    db.update(TABLE_LOG_LIST, values, COL_LOG_ID + "=?", iArg(i));
+                }
+
+                values.clear();
+                // 2
+                // itemId -> afterId 로 변환
+                // itemId:time -> afterTime 으로 변환
+                values.put(COL_LOG_ID, afterId); // itemId -> afterId 로 변환
+                values.put(COL_TIME, afterTime); // itemId:time -> afterTime 으로 변환
+                db.update(TABLE_LOG_LIST, values, COL_LOG_ID + "=?", iArg(itemId));
+
+                // commit
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

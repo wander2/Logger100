@@ -11,8 +11,33 @@ public class ItemList extends ArrayList<BaseItem> {
         return new BaseItem();
     }
 
+    public LogItem getFirstItem() {
+        BaseItem firstItem = getItemAt(2);
+        if (firstItem instanceof LogItem) {
+            return (LogItem) firstItem;
+        }
+        return new LogItem();
+    }
 
+    public LogItem getLastItem() {
+        BaseItem lastItem = getItemAt(size() - 1);
+        if (lastItem instanceof LogItem) {
+            return (LogItem) lastItem;
+        }
+        return new LogItem();
+    }
 
+    public LogItem getLogItemAtOrUpper(int position) {
+        BaseItem item = getItemAt(position);
+        if (item instanceof LogItem) {
+            return (LogItem) item;
+        }
+        item = getItemAt(position - 1);
+        if (item instanceof LogItem) {
+            return (LogItem) item;
+        }
+        return new LogItem();
+    }
 
 
 
@@ -30,14 +55,6 @@ public class ItemList extends ArrayList<BaseItem> {
         BaseItem baseItem = getItemAt(position);
         BaseItem upperItem = getItemAt(position - 1);
         return baseItem instanceof LogItem && upperItem instanceof DateItem;
-    }
-
-    public LogItem getLastItem() {
-        BaseItem lastItem = getItemAt(size() - 1);
-        if (lastItem instanceof LogItem) {
-            return (LogItem) lastItem;
-        }
-        return new LogItem();
     }
 
     public int getNextSearchPosition(int focusPosition, String searchString) {
@@ -177,4 +194,17 @@ public class ItemList extends ArrayList<BaseItem> {
             }
         }
     }
+
+
+
+
+
+
+
+
+
+    // 시간 삽입 기능
+
+
+
 }

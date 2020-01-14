@@ -102,6 +102,10 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
         return focusPosition;
     }
 
+    public int getPositionById(int id) {
+        return itemList.getPositionById(id);
+    }
+
     @Override
     public int getItemCount() {
         if (itemList != null) {
@@ -238,5 +242,59 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
         return itemList.getItemAt(position);
     }
 
+    // return : betweenId1, betweenId2
+    // 0위치: [0, id]
+    // n위치: [id, id+2]
+    public int[] timeInsertFindBetween(int time) {
+        // t[n-1] <= t 이면 n위치
+        LogItem item = bItemList.getLastItem();
+        if (item.getTime() <= time) {
+            return new int[]{item.getId(), item.getId() + 2};
+        }
+
+        // for n-1 ~ 3
+        // t[i-1] <= t 이면 i위치
+        // 0:BaseItem, 1:DateItem, 2:LogItem, 3:LogItem
+        LogItem itemUpper;
+        for (int i = bItemList.size() - 1; i >= 3; i--) {
+            if (bItemList.getItemAt(i) instanceof LogItem) {
+                item = (LogItem) bItemList.getItemAt(i);
+                itemUpper = bItemList.getLogItemAtOrUpper(i - 1);
+                if (itemUpper.getTime() <= time) {
+                    return new int[]{itemUpper.getId(), item.getId()};
+                }
+            }
+        }
+
+        // t < t[0] 이면 0위치
+        item = bItemList.getFirstItem();
+        if (time < item.getTime()) {
+            return new int[]{0, item.getId()};
+        }
+
+        return null;
+    }
+
+    // return: no push => -1
+    //            push => until id (between[1] ~ until id - 1) -> (between[1] + 1 ~ until id)
+    //                    between[1] = between[0] + 1
+    // insert id = between[0] + 1
+    public int timeInsertFindPushUntil(int[] betweenIds) {
+        if (betweenIds[1] - betweenIds[0] == 1) {
+            int id = betweenIds[1];
+            int p = bItemList.getPositionById(id);
+            for (p += 1; p < bItemList.size(); p++) {
+                if (bItemList.getItemAt(p) instanceof LogItem) {
+                    id += 1;
+                    if (bItemList.getItemAt(p).getId() > id) {
+                        return id;
+                    }
+                }
+            }
+            id += 1;
+            return id;
+        }
+        return -1;
+    }
 
 }

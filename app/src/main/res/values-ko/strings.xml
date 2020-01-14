@@ -22,6 +22,7 @@
     <string name="copy">복사</string>
     <string name="copy_all">전체 복사</string>
     <string name="share">공유</string>
+    <string name="share_all">전체 공유</string>
     <string name="add">추가</string>
 
     <string name="cancel">취소</string>
@@ -57,20 +58,22 @@
     <string name="left">왼쪽</string>
     <string name="right">오른쪽</string>
 
+    <string name="change_time">시간 변경</string>
+
     <string-array name="db_help">
-        <item>메모를 클릭하거나 길게 클릭해보세요.</item>
-        <item>두 손가락으로 줌인하거나 줌아웃 해보세요.</item>
-        <item>저장 버튼을 길게 클릭하면 검색모드로 들어갑니다.\n검색 버튼을 클릭하면 검색 결과를 밑에서부터 탐색합니다.</item>
-        <item>다른 어플에서 텍스트를 공유해서 기록장에 저장할 수 있습니다.</item>
-        <item>메뉴 - 비밀 기록을 누르면 별도의 창으로 이동합니다.\n비밀 기록의 기본 비밀번호는 없습니다. (바로 확인 클릭)</item>
-        <item>날짜를 길게 클릭해서 도움말을 모두 삭제해보세요.</item>
+        <item>메모를 클릭하거나 길게 눌러보세요.</item>
+        <item>두 손가락으로 줌인/줌아웃 할 수 있습니다.</item>
+        <item>저장 버튼을 길게 누르면 검색모드로 들어갑니다.\n검색 버튼을 클릭하면 검색 결과를 밑에서부터 탐색합니다.</item>
+        <item>다른 어플에서 텍스트를 공유하여 기록장에 저장할 수 있습니다.</item>
+        <item>날짜를 길게 눌러보세요.</item>
+        <item>메뉴 - 비밀 기록 : 기본 비밀번호 = 없음 (바로 확인 클릭)</item>
     </string-array>
 
     <string-array name="db_help_hidden">
         <item>메뉴에서 비밀번호를 변경해주세요.</item>
     </string-array>
 
-    <string name="patch_note">[업데이트]\n비밀 기록 기능이 추가되었습니다. (메뉴에서 확인)</string>
+    <string name="patch_note">[업데이트]\n각 메모 왼쪽에 있는 시간(00:00)을 클릭하여 날짜/시간을 변경할 수 있습니다.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>일</item>
