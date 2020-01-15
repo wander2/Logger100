@@ -66,6 +66,7 @@
         <item>저장 버튼을 길게 누르면 검색모드로 들어갑니다.\n검색 버튼을 클릭하면 검색 결과를 밑에서부터 탐색합니다.</item>
         <item>다른 어플에서 텍스트를 공유하여 기록장에 저장할 수 있습니다.</item>
         <item>날짜를 길게 눌러보세요.</item>
+        <item>각 메모 왼쪽에 있는 시간(00:00)을 클릭하여 날짜/시간을 변경할 수 있습니다.</item>
         <item>메뉴 - 비밀 기록 : 기본 비밀번호 = 없음 (바로 확인 클릭)</item>
     </string-array>
 
@@ -133,6 +134,12 @@
         <item>October</item>
         <item>November</item>
         <item>December</item>
+    </string-array>
+
+    <string-array name="df_ymd">
+        <item>"년 "</item>
+        <item>"월 "</item>
+        <item>"일 "</item>
     </string-array>
 
     <string name="date_format_help">"예) 2019&#8211;4&#8211;2 (화)\n{YYYY} = 2019 {YY} = 19\n{M} = 4 {MM} = 04 {_M} = _4\n{D} = 2 {DD} = 02 {_D} = _2\n{DDD} = 화 {DDDD} = 화요일\n{W} = 火  {n} = 줄바꿈\n요일별 색상설정\n{wf} = 부터 {wt} = 까지"</string>

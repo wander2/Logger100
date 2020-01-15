@@ -16,6 +16,7 @@ public class TimeUtil {
     private static String[] df_week_han;
     private static String[] df_month_short;
     private static String[] df_month;
+    private static String[] df_ymd;
 
     private static final int[] MONTH_DAYS_NORMAL = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
     private static final int[] MONTH_DAYS_LEAP = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
@@ -26,6 +27,7 @@ public class TimeUtil {
         df_week_han = context.getResources().getStringArray(R.array.df_week_han);
         df_month_short = context.getResources().getStringArray(R.array.df_month_short);
         df_month = context.getResources().getStringArray(R.array.df_month);
+        df_ymd = context.getResources().getStringArray(R.array.df_ymd);
     }
 
     // time -> Minutes
@@ -56,7 +58,7 @@ public class TimeUtil {
         return getTimeString(h, m);
     }
 
-    static String getTimeString(int h, int m) {
+    private static String getTimeString(int h, int m) {
         StringBuilder sb = new StringBuilder();
         if (h < 10) sb.append(' '); sb.append(h); sb.append(':');
         if (m < 10) sb.append('0'); sb.append(m); sb.append(' ');
@@ -116,7 +118,7 @@ public class TimeUtil {
         final int month = each[1];
         final int dayOfMonth = each[2];
         final int week = each[3];
-        return year + "-" + month + "-" + dayOfMonth + " (" + df_week_short[week].toUpperCase() + ")";
+        return year + df_ymd[0] + month + df_ymd[1] + dayOfMonth + df_ymd[2] + "(" + df_week_short[week].toUpperCase() + ")";
     }
 
     static String getDefaultDateFormatFromDays(int days) {
@@ -125,7 +127,7 @@ public class TimeUtil {
         final int month = each[1];
         final int dayOfMonth = each[2];
         final int week = each[3];
-        return year + "-" + month + "-" + dayOfMonth + " (" + df_week_short[week].toUpperCase() + ")";
+        return year + df_ymd[0] + month + df_ymd[1] + dayOfMonth + df_ymd[2] + "(" + df_week_short[week].toUpperCase() + ")";
     }
 
     private static int getWeek(int days) {

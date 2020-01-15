@@ -185,21 +185,26 @@ public class Database extends SQLiteOpenHelper {
         } else {
             db.beginTransaction();
             try {
+                ContentValues values = new ContentValues();
+                // 0
+                // itemId -> -1 로 변환
+                // itemId:time -> afterTime 으로 변환
+                values.put(COL_LOG_ID, -1); // itemId -> -1 로 변환
+                values.put(COL_TIME, afterTime); // itemId:time -> afterTime 으로 변환
+                db.update(TABLE_LOG_LIST, values, COL_LOG_ID + "=?", iArg(itemId));
+                values.clear();
+
                 // 1
                 // afterId ~ pushUntilId-1    =>    afterId+1 ~ pushUntilId
-                ContentValues values = new ContentValues();
                 for (int i = pushUntilId - 1; i >= afterId; i--) {
                     values.put(COL_LOG_ID, i + 1); // id++
                     db.update(TABLE_LOG_LIST, values, COL_LOG_ID + "=?", iArg(i));
                 }
 
-                values.clear();
                 // 2
-                // itemId -> afterId 로 변환
-                // itemId:time -> afterTime 으로 변환
-                values.put(COL_LOG_ID, afterId); // itemId -> afterId 로 변환
-                values.put(COL_TIME, afterTime); // itemId:time -> afterTime 으로 변환
-                db.update(TABLE_LOG_LIST, values, COL_LOG_ID + "=?", iArg(itemId));
+                // -1 -> afterId 로 변환
+                values.put(COL_LOG_ID, afterId); // -1 -> afterId 로 변환
+                db.update(TABLE_LOG_LIST, values, COL_LOG_ID + "=?", iArg(-1));
 
                 // commit
                 db.setTransactionSuccessful();
