@@ -58,7 +58,7 @@ public class TimeUtil {
         return getTimeString(h, m);
     }
 
-    private static String getTimeString(int h, int m) {
+    static String getTimeString(int h, int m) {
         StringBuilder sb = new StringBuilder();
         if (h < 10) sb.append(' '); sb.append(h); sb.append(':');
         if (m < 10) sb.append('0'); sb.append(m); sb.append(' ');
@@ -114,15 +114,15 @@ public class TimeUtil {
 
     public static String getDefaultDateFormat(int time) {
         final int[] each = getEach(time);
-        final int year = each[0];
-        final int month = each[1];
-        final int dayOfMonth = each[2];
-        final int week = each[3];
-        return year + df_ymd[0] + month + df_ymd[1] + dayOfMonth + df_ymd[2] + "(" + df_week_short[week].toUpperCase() + ")";
+        return getDefaultDateFormatFromEach(each);
     }
 
     static String getDefaultDateFormatFromDays(int days) {
         final int[] each = getEachFromDays(days);
+        return getDefaultDateFormatFromEach(each);
+    }
+
+    static String getDefaultDateFormatFromEach(int[] each) {
         final int year = each[0];
         final int month = each[1];
         final int dayOfMonth = each[2];

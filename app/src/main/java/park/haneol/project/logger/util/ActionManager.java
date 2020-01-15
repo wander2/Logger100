@@ -6,9 +6,13 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -255,7 +259,7 @@ public class ActionManager {
 
         // 다이얼로그
         final AlertDialog dialog = new AlertDialog.Builder(main)
-                .setTitle(TimeUtil.getDefaultDateFormat(item.getTime()))
+                .setTitle(TimeUtil.getDefaultDateFormat(item.getTime()) + " " + TimeUtil.getTimeString(item.getTime()))
                 .setView(contentView)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
@@ -263,6 +267,12 @@ public class ActionManager {
                     public void onClick(DialogInterface dialog, int which) {
                         // 시간
                         int afterTime = TimeUtil.toSystemTime(date, hm);
+
+                        // 현재 시간 넘으면 현재 시간으로
+                        int currentTime = TimeUtil.getCurrentTime();
+                        if (afterTime > currentTime) {
+                            afterTime = currentTime;
+                        }
 
                         // 지우고 삽입위치 탐색
                         main.mAdapter.removeItem(position);
@@ -298,22 +308,15 @@ public class ActionManager {
                 // 변수에 저장
                 System.arraycopy(afterDate, 0, date, 0, 4);
 
-                // 다이얼로그 제목에 날짜 반영
-                dialog.setTitle(TimeUtil.getDefaultDateFormatFromDays(days));
-
-                // 최대 시간 넘으면 시간도 변경
+                // 최대 시간 넘는지
                 int newTime = TimeUtil.toSystemTime(date, hm);
                 int currentTime = TimeUtil.getCurrentTime();
                 if (newTime > currentTime) {
-                    int currentDayMinutes = TimeUtil.getLocalDayMinutes(currentTime);
-                    hm[0] = currentDayMinutes / 60;
-                    hm[1] = currentDayMinutes % 60;
-                    timePicker.setCurrentMinute(hm[1]);
-                    timePicker.setCurrentHour(hm[0]);
-
-                    // 날짜도 변경
-                    System.arraycopy(TimeUtil.getEach(currentTime), 0, date, 0, 4);
-                    datePicker.updateDate(date[0], date[1] - 1, date[2]);
+                    // 타이틀에 최신 날짜로 표시
+                    dialog.setTitle(blueString(TimeUtil.getDefaultDateFormat(currentTime) + " " + TimeUtil.getTimeString(currentTime)));
+                } else {
+                    // 다이얼로그 제목에 반영
+                    dialog.setTitle(TimeUtil.getDefaultDateFormatFromEach(date) + " " + TimeUtil.getTimeString(hm[0], hm[1]));
                 }
             }
         });
@@ -330,25 +333,31 @@ public class ActionManager {
         timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
             @Override
             public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                // 시간 받아옴
+                // 변수에 저장
                 hm[0] = hourOfDay;
                 hm[1] = minute;
 
-                // 시간이 현재시간보다 클 경우 현재시간으로 설정됨
+                // 최대 시간 넘는지
                 int newTime = TimeUtil.toSystemTime(date, hm);
                 int currentTime = TimeUtil.getCurrentTime();
                 if (newTime > currentTime) {
-                    int currentDayMinutes = TimeUtil.getLocalDayMinutes(currentTime);
-                    hm[0] = currentDayMinutes / 60;
-                    hm[1] = currentDayMinutes % 60;
-                    timePicker.setCurrentMinute(hm[1]);
-                    timePicker.setCurrentHour(hm[0]);
+                    // 타이틀에 최신 날짜로 표시
+                    dialog.setTitle(blueString(TimeUtil.getDefaultDateFormat(currentTime) + " " + TimeUtil.getTimeString(currentTime)));
+                } else {
+                    // 다이얼로그 제목에 반영
+                    dialog.setTitle(TimeUtil.getDefaultDateFormatFromEach(date) + " " + TimeUtil.getTimeString(hm[0], hm[1]));
                 }
             }
         });
 
         // 띄우기
         dialog.show();
+    }
+
+    private Spannable blueString(String string) {
+        SpannableString spannable = new SpannableString(string);
+        spannable.setSpan(new ForegroundColorSpan(Color.BLUE), 0, string.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return spannable;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
