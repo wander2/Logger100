@@ -97,7 +97,17 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        if (item.getText().startsWith("http://") || item.getText().startsWith("https://")) {
+
+        boolean isLinkFirst = item.getText().startsWith("http://") || item.getText().startsWith("https://");
+        final boolean isLinkLast;
+        if (isLinkFirst) {
+            isLinkLast = false;
+        } else {
+            String lastLine = item.getText().substring(item.getText().lastIndexOf('\n') + 1);
+            isLinkLast = lastLine.startsWith("http://") || lastLine.startsWith("https://");
+        }
+
+        if (isLinkFirst || isLinkLast) {
             int[] titleRes = {
                     R.string.move,
                     item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
@@ -109,7 +119,12 @@ public class ActionManager {
                 public boolean onMenuItemClick(MenuItem menuItem) {
                     switch (menuItem.getItemId()) {
                         case 0:
-                            onClickLink(item.getText());
+                            if (isLinkLast) {
+                                String lastLine = item.getText().substring(item.getText().lastIndexOf('\n') + 1);
+                                onClickLink(lastLine);
+                            } else {
+                                onClickLink(item.getText());
+                            }
                             return true;
                         case 1:
                             onClickHighlight(position);

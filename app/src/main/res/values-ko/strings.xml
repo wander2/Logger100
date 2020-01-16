@@ -69,9 +69,9 @@
         <item>날짜를 길게 눌러보세요.</item>
         <item>각 메모 왼쪽에 있는 시간(00:00)을 클릭하여 날짜/시간을 변경할 수 있습니다.</item>
         <item>메뉴 - 비밀 기록 : 기본 비밀번호 = 없음 (바로 확인 클릭)</item>
-        <item>링크를 열 수 있습니다. ("http://" 또는 "https://"로 시작하는 메모)</item>
+        <item>링크를 열 수 있습니다. ("http://" 또는 "https://"로 시작하는 메모, 마지막 줄도 가능)</item>
         <item>https://www.google.com/</item>
-        <item>https://www.youtube.com/feed/music</item>
+        <item>유튜브 음악피드\nhttps://www.youtube.com/feed/music</item>
     </string-array>
 
     <string-array name="db_help_hidden">
@@ -80,9 +80,9 @@
 
     <string-array name="patch_note">
         <item>[업데이트 1]\n각 메모 왼쪽에 있는 시간(00:00)을 클릭하여 날짜/시간을 변경할 수 있습니다.</item>
-        <item>[업데이트 2]\n링크를 열 수 있습니다. ("http://" 또는 "https://"로 시작하는 메모)</item>
+        <item>[업데이트 2]\n링크를 열 수 있습니다. ("http://" 또는 "https://"로 시작하는 메모, 마지막 줄도 가능)</item>
         <item>https://www.google.com/</item>
-        <item>https://www.youtube.com/feed/music</item>
+        <item>유튜브 음악피드\nhttps://www.youtube.com/feed/music</item>
     </string-array>
 
     <string-array name="df_week_short"> <!--ddd-->
