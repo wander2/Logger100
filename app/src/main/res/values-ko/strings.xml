@@ -59,6 +59,7 @@
     <string name="right">오른쪽</string>
 
     <string name="change_time">시간 변경</string>
+    <string name="move">링크 열기</string>
 
     <string-array name="db_help">
         <item>메모를 클릭하거나 길게 눌러보세요.</item>
@@ -68,13 +69,21 @@
         <item>날짜를 길게 눌러보세요.</item>
         <item>각 메모 왼쪽에 있는 시간(00:00)을 클릭하여 날짜/시간을 변경할 수 있습니다.</item>
         <item>메뉴 - 비밀 기록 : 기본 비밀번호 = 없음 (바로 확인 클릭)</item>
+        <item>링크를 열 수 있습니다. ("http://" 또는 "https://"로 시작하는 메모)</item>
+        <item>https://www.google.com/</item>
+        <item>https://www.youtube.com/feed/music</item>
     </string-array>
 
     <string-array name="db_help_hidden">
         <item>메뉴에서 비밀번호를 변경해주세요.</item>
     </string-array>
 
-    <string name="patch_note">[업데이트]\n각 메모 왼쪽에 있는 시간(00:00)을 클릭하여 날짜/시간을 변경할 수 있습니다.</string>
+    <string-array name="patch_note">
+        <item>[업데이트 1]\n각 메모 왼쪽에 있는 시간(00:00)을 클릭하여 날짜/시간을 변경할 수 있습니다.</item>
+        <item>[업데이트 2]\n링크를 열 수 있습니다. ("http://" 또는 "https://"로 시작하는 메모)</item>
+        <item>https://www.google.com/</item>
+        <item>https://www.youtube.com/feed/music</item>
+    </string-array>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>일</item>

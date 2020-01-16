@@ -59,6 +59,7 @@
     <string name="right">Right</string>
 
     <string name="change_time">Change Time</string>
+    <string name="move">Open link</string>
 
     <string-array name="db_help">
         <item>Try click or long-press a item.</item>
@@ -68,13 +69,21 @@
         <item>Try long-press a date item.</item>
         <item>You can change date/time by clicking time(00:00) at the left of each item.</item>
         <item>Menu - Hidden log : default password is nothing. (Just click confirm button)</item>
+        <item>You can open link. (starts with "http://" or "https://")</item>
+        <item>https://www.google.com/</item>
+        <item>https://www.youtube.com/feed/music</item>
     </string-array>
 
     <string-array name="db_help_hidden">
         <item>Please change your password from the menu.</item>
     </string-array>
 
-    <string name="patch_note">[Update]\nYou can change date/time by clicking time(00:00) at the left of each item.</string>
+    <string-array name="patch_note">
+        <item>[Update 1]\nYou can change date/time by clicking time(00:00) at the left of each item.</item>
+        <item>[Update 2]\nYou can open link. (starts with "http://" or "https://")</item>
+        <item>https://www.google.com/</item>
+        <item>https://www.youtube.com/feed/music</item>
+    </string-array>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>Sun</item>

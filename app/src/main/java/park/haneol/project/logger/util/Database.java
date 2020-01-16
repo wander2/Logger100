@@ -24,7 +24,7 @@ public class Database extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME  = "logger.db";
     public static final String DATABASE_NAME_HIDDEN  = "logger_hidden.db";
-    private static final int DATABASE_VERSION  = 43;
+    private static final int DATABASE_VERSION  = 44;
 
     private static final String TABLE_LOG_LIST = "log_list";
     private static final String COL_LOG_ID     = "log_id";
@@ -59,7 +59,7 @@ public class Database extends SQLiteOpenHelper {
             clearPrefData48(db);
         }
         if (oldVersion < DATABASE_VERSION && getDatabaseName().equals(DATABASE_NAME)) {
-            insertNote(db, context.getString(R.string.patch_note));
+            insertNote(db, context.getResources().getStringArray(R.array.patch_note));
         }
     }
 
@@ -72,11 +72,13 @@ public class Database extends SQLiteOpenHelper {
         }
     }
 
-    private void insertNote(SQLiteDatabase db, String string) {
+    private void insertNote(SQLiteDatabase db, String[] stringArray) {
         ContentValues values = new ContentValues();
         values.put(COL_TIME, TimeUtil.getCurrentTime());
-        values.put(COL_LOG, string);
-        db.insert(TABLE_LOG_LIST, null, values);
+        for (String text: stringArray) {
+            values.put(COL_LOG, text);
+            db.insert(TABLE_LOG_LIST, null, values);
+        }
     }
 
     private void clearPrefData48(SQLiteDatabase db) {

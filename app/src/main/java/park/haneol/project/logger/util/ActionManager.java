@@ -97,28 +97,57 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        int[] titleRes = {
-                item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
-                R.string.edit,
-                R.string.remove
-        };
-        popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case 0:
-                        onClickHighlight(position);
-                        return true;
-                    case 1:
-                        onClickEdit(position);
-                        return true;
-                    case 2:
-                        onClickRemove(position);
-                        return true;
+        if (item.getText().startsWith("http://") || item.getText().startsWith("https://")) {
+            int[] titleRes = {
+                    R.string.move,
+                    item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
+                    R.string.edit,
+                    R.string.remove
+            };
+            popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case 0:
+                            onClickLink(item.getText());
+                            return true;
+                        case 1:
+                            onClickHighlight(position);
+                            return true;
+                        case 2:
+                            onClickEdit(position);
+                            return true;
+                        case 3:
+                            onClickRemove(position);
+                            return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
+        } else {
+            int[] titleRes = {
+                    item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
+                    R.string.edit,
+                    R.string.remove
+            };
+            popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case 0:
+                            onClickHighlight(position);
+                            return true;
+                        case 1:
+                            onClickEdit(position);
+                            return true;
+                        case 2:
+                            onClickRemove(position);
+                            return true;
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,51 +157,32 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        if (main instanceof HiddenActivity) {
-            int[] titleRes = {
-                    R.string.copy,
-                    R.string.move_hidden_return
-
-            };
-            popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    switch (menuItem.getItemId()) {
-                        case 0:
-                            copy(item.getText());
-                            return true;
-                        case 1:
+        int[] titleRes = {
+                R.string.copy,
+                R.string.share,
+                main instanceof HiddenActivity ? R.string.move_hidden_return : R.string.move_hidden
+        };
+        popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case 0:
+                        copy(item.getText());
+                        return true;
+                    case 1:
+                        share(item.getText());
+                        return true;
+                    case 2:
+                        if (main instanceof HiddenActivity) {
                             onClickHideReturn(position);
-                            return true;
-                    }
-                    return false;
-                }
-            });
-        } else {
-            int[] titleRes = {
-                    R.string.copy,
-                    R.string.share,
-                    R.string.move_hidden
-
-            };
-            popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    switch (menuItem.getItemId()) {
-                        case 0:
-                            copy(item.getText());
-                            return true;
-                        case 1:
-                            share(item.getText());
-                            return true;
-                        case 2:
+                        } else {
                             onClickHide(position);
-                            return true;
-                    }
-                    return false;
+                        }
+                        return true;
                 }
-            });
-        }
+                return false;
+            }
+        });
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -753,6 +763,10 @@ public class ActionManager {
 
 
 
+    private void onClickLink(String linkText) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkText));
+        main.startActivity(browserIntent);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
