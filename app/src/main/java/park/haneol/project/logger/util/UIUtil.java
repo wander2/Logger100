@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Build;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -85,7 +84,6 @@ public class UIUtil {
 
     public static void predictMargin(View view, boolean marginOn) {
         ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-        Log.d("AAA", ""+marginOn + "    "+params.bottomMargin);
         if (marginOn && PrefUtil.keypadHeight != 0) {
             params.bottomMargin = PrefUtil.keypadHeight;
             view.setLayoutParams(params);

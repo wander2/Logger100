@@ -45,6 +45,10 @@ public class LogItem extends BaseItem {
         this.id = id;
     }
 
+    public void setTime(int time) {
+        this.time = time;
+    }
+
     public void setText(String text) {
         this.text = text;
     }

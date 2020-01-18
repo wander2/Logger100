@@ -24,7 +24,7 @@ public class Database extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME  = "logger.db";
     public static final String DATABASE_NAME_HIDDEN  = "logger_hidden.db";
-    private static final int DATABASE_VERSION  = 44;
+    private static final int DATABASE_VERSION  = 45;
 
     private static final String TABLE_LOG_LIST = "log_list";
     private static final String COL_LOG_ID     = "log_id";
@@ -58,8 +58,10 @@ public class Database extends SQLiteOpenHelper {
                     " ADD COLUMN " + COL_FLAG + " INTEGER DEFAULT 0");
             clearPrefData48(db);
         }
-        if (oldVersion < DATABASE_VERSION && getDatabaseName().equals(DATABASE_NAME)) {
-            insertNote(db, context.getResources().getStringArray(R.array.patch_note));
+        if (getDatabaseName().equals(DATABASE_NAME)) {
+            insertNote(db, oldVersion, 43, context.getString(R.string.patch_note_43)); // 시간 변경
+            insertNote(db, oldVersion, 44, context.getString(R.string.patch_note_44)); // 링크 열기
+            insertNote(db, oldVersion, 45, context.getString(R.string.patch_note_45)); // 시간 저장 시점
         }
     }
 
@@ -72,11 +74,11 @@ public class Database extends SQLiteOpenHelper {
         }
     }
 
-    private void insertNote(SQLiteDatabase db, String[] stringArray) {
-        ContentValues values = new ContentValues();
-        values.put(COL_TIME, TimeUtil.getCurrentTime());
-        for (String text: stringArray) {
-            values.put(COL_LOG, text);
+    private void insertNote(SQLiteDatabase db, int oldVersion, int newVersion, String string) {
+        if (oldVersion < newVersion) {
+            ContentValues values = new ContentValues();
+            values.put(COL_TIME, TimeUtil.getCurrentTime());
+            values.put(COL_LOG, string);
             db.insert(TABLE_LOG_LIST, null, values);
         }
     }
@@ -124,9 +126,13 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public LogItem insert(String text) {
+        int time = TimeUtil.getCurrentTime();
+        return insert(text, time);
+    }
+
+    public LogItem insert(String text, int time) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        int time = TimeUtil.getCurrentTime();
         values.put(COL_TIME, time);
         values.put(COL_LOG, text);
         int logId = (int) db.insert(TABLE_LOG_LIST, null, values);

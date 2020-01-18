@@ -31,7 +31,7 @@ public class TimeUtil {
     }
 
     // time -> Minutes
-    static int getCurrentTime() {
+    public static int getCurrentTime() {
         return (int) (System.currentTimeMillis() / 60000L);
     }
 
@@ -216,6 +216,20 @@ public class TimeUtil {
             return YYYY.substring(YYYY.length() - 2);
         }
         return YYYY;
+    }
+
+    public static int getSaveTime() {
+        int settingSavingTime = PrefUtil.settingSavingTime;
+        if (settingSavingTime == 1) {
+            // 처음 입력 시점의 시간
+            int time = PrefUtil.timePreserved;
+            if (time != -1) {
+                return time;
+            }
+        }
+        // settingSavingTime == 0 or else
+        // (기본) 저장 클릭 시점
+        return getCurrentTime();
     }
 
 }

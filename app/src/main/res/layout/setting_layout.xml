@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -39,6 +38,31 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            android:paddingEnd="10dp"
+            android:textColor="@android:color/black"
+            android:text="@string/saving_time_setting"/>
+
+        <Spinner
+            android:id="@+id/setting_saving_time_spinner"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/setting_button_date_format_change"
         style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
@@ -46,9 +70,26 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginBottom="10dp"
         android:text="@string/date_format_change"/>
 
+    <Button
+        android:id="@+id/setting_button_shortcut_setting"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/shortcut_setting"/>
+
+    <CheckBox
+        android:id="@+id/setting_edit_time"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="10dp"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_time" />
 
     <CheckBox
         android:id="@+id/setting_secure"
@@ -58,65 +99,5 @@
         android:layout_marginBottom="10dp"
         android:layout_height="wrap_content"
         android:text="@string/setting_secure" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="10dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingRight="10dp"
-            android:paddingEnd="10dp"
-            android:textColor="@android:color/black"
-            android:text="@string/label_separator"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="10dp"
-                android:paddingEnd="10dp"
-                android:textColor="@android:color/black"
-                android:text="@string/left"/>
-
-            <EditText
-                android:id="@+id/setting_label_separator_left"
-                android:inputType="textNoSuggestions"
-                android:hint="@null"
-                tools:ignore="autoFill"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="10dp"
-                android:paddingEnd="10dp"
-                android:textColor="@android:color/black"
-                android:text="@string/right"/>
-
-            <EditText
-                android:id="@+id/setting_label_separator_right"
-                android:inputType="textNoSuggestions"
-                android:hint="@null"
-                tools:ignore="autoFill"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
 
 </LinearLayout>

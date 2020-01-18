@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // 화면 보안
-        if (PrefUtil.getIsScreenSecure(this)) {
+        if (PrefUtil.getScreenSecure(this)) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         }
 
@@ -209,6 +209,27 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             });
+
+            // (저장시점 설정시) 입력창 변경 -> 길이가 0이면 저장시간 초기화
+            if (PrefUtil.settingSavingTime == 1) {
+                mInputText.addTextChangedListener(new TextWatcher() {
+                    int c = PrefUtil.getTextPreserved(MainActivity.this).length();
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (c != s.length()) {
+                            if (c == 0) {
+                                // 시간 저장
+                                PrefUtil.setTimePreserved(MainActivity.this, TimeUtil.getCurrentTime());
+                            }
+                            c = s.length();
+                        }
+                    }
+                    @Override
+                    public void afterTextChanged(Editable s) {}
+                });
+            }
         }
 
         // 검색 모드 토글

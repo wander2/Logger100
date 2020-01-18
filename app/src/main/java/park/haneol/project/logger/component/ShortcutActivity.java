@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -14,6 +16,7 @@ import park.haneol.project.logger.item.LogItem;
 import park.haneol.project.logger.util.ActivityObserver;
 import park.haneol.project.logger.util.Database;
 import park.haneol.project.logger.util.PrefUtil;
+import park.haneol.project.logger.util.TimeUtil;
 import park.haneol.project.logger.view.ShortcutEditText;
 
 public class ShortcutActivity extends AppCompatActivity {
@@ -66,6 +69,27 @@ public class ShortcutActivity extends AppCompatActivity {
             }
         });
 
+        // (저장시점 설정시) 입력창 변경 -> 길이가 0이면 저장시간 초기화
+        if (PrefUtil.getSettingSavingTime(this) == 1) {
+            editText.addTextChangedListener(new TextWatcher() {
+                int c = 0;
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (c != s.length()) {
+                        if (c == 0) {
+                            // 시간 저장
+                            PrefUtil.timePreserved = TimeUtil.getCurrentTime();
+                        }
+                        c = s.length();
+                    }
+                }
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        }
+
         // 버튼 동작
         neutralButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +123,7 @@ public class ShortcutActivity extends AppCompatActivity {
         }
 
         Database database = new Database(this, Database.DATABASE_NAME);
-        LogItem item = database.insert(text);
+        LogItem item = database.insert(text, TimeUtil.getSaveTime());
 
         MainActivity activity = ActivityObserver.getInstance().getActivity();
         if (activity != null) {

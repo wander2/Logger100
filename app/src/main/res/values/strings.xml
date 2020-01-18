@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="msg_shortcut_created">Shortcut is created.</string>
     <string name="msg_password_changed">Password is changed.</string>
     <string name="msg_password_changing">"Changing password by %s.\n(If you forget this, clear app data.)"</string>
     <string name="msg_password_first">Please enter the password.</string>
     <string name="msg_password_not">Password is incorrect.</string>
 
+    <string name="edit_time">Update time when editing</string>
+
     <string name="move_hidden_return">Return</string>
     <string name="move_hidden">Hide</string>
-    <string name="hidden">Hidden log</string>
+    <string name="hidden">Hidden</string>
     <string name="change_password">Change password</string>
 
     <string name="app_name">Logger</string>
@@ -60,6 +63,13 @@
 
     <string name="change_time">Change Time</string>
     <string name="move">Open link</string>
+    <string name="shortcut_setting">Shortcut setting</string>
+    <string name="saving_time_setting">Saving time</string>
+
+    <string-array name="saving_time_list">
+        <item>Clicking Save</item>
+        <item>Starting input</item>
+    </string-array>
 
     <string-array name="db_help">
         <item>Try click or long-press a item.</item>
@@ -69,21 +79,17 @@
         <item>Try long-press a date item.</item>
         <item>You can change date/time by clicking time(00:00) at the left of each item.</item>
         <item>Menu - Hidden log : default password is nothing. (Just click confirm button)</item>
-        <item>You can open link. (starts with "http://" or "https://", OK with last line)</item>
-        <item>https://www.google.com/</item>
-        <item>Youtube Music Feed\nhttps://www.youtube.com/feed/music</item>
+        <item>You can open link. (detects line starting with "http://" or "https://")</item>
+        <item>ex) Youtube Music Feed\nhttps://www.youtube.com/feed/music</item>
     </string-array>
 
     <string-array name="db_help_hidden">
         <item>Please change your password from the menu.</item>
     </string-array>
 
-    <string-array name="patch_note">
-        <item>[Update 1]\nYou can change date/time by clicking time(00:00) at the left of each item.</item>
-        <item>[Update 2]\nYou can open link. (starts with "http://" or "https://", OK with last line)</item>
-        <item>https://www.google.com/</item>
-        <item>Youtube Music Feed\nhttps://www.youtube.com/feed/music</item>
-    </string-array>
+    <string name="patch_note_43">[Update]\n- You can change date/time by clicking time(00:00) at the left of each item.</string>
+    <string name="patch_note_44">[Update]\n- You can open link. (detects line starting with "http://" or "https://")\nex) Youtube Music Feed\nhttps://www.youtube.com/feed/music</string>
+    <string name="patch_note_45">[Update]\n- You can select saving time at the setting.\n- You can set update time when editing at the setting.</string>
 
     <string-array name="df_week_short"> <!--ddd-->
         <item>Sun</item>
@@ -166,7 +172,7 @@
     {wf} = from    {wt} = to
     -->
 
-    <string name="help_predict_keypad">"* Keypad prediction helps app start smoother.\n* If not natural, please turn off this option."</string>
+    <string name="help_predict_keypad">"* Keypad prediction helps app start smoother. (If it doesn't work properly, please turn off this option)"</string>
     <!--
     * Keypad prediction helps app start smoother.
     * It may not work properly under certain circumstances.

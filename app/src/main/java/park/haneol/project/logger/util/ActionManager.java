@@ -10,8 +10,10 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -98,16 +100,18 @@ public class ActionManager {
             return;
         }
 
-        boolean isLinkFirst = item.getText().startsWith("http://") || item.getText().startsWith("https://");
-        final boolean isLinkLast;
-        if (isLinkFirst) {
-            isLinkLast = false;
-        } else {
-            String lastLine = item.getText().substring(item.getText().lastIndexOf('\n') + 1);
-            isLinkLast = lastLine.startsWith("http://") || lastLine.startsWith("https://");
+        String[] split = item.getText().split("\n");
+        String linkText1 = null;
+        for (String trimmed: split) {
+            trimmed = trimmed.trim();
+            if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+                linkText1 = trimmed;
+                break;
+            }
         }
+        final String linkText = linkText1;
 
-        if (isLinkFirst || isLinkLast) {
+        if (linkText != null) {
             int[] titleRes = {
                     R.string.move,
                     item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
@@ -119,12 +123,7 @@ public class ActionManager {
                 public boolean onMenuItemClick(MenuItem menuItem) {
                     switch (menuItem.getItemId()) {
                         case 0:
-                            if (isLinkLast) {
-                                String lastLine = item.getText().substring(item.getText().lastIndexOf('\n') + 1);
-                                onClickLink(lastLine);
-                            } else {
-                                onClickLink(item.getText());
-                            }
+                            onClickLink(linkText);
                             return true;
                         case 1:
                             onClickHighlight(position);
@@ -406,12 +405,21 @@ public class ActionManager {
         if (item == null) {
             return;
         }
+
+        final boolean wasKeypadShown = UIUtil.keypadShown;
+
         // Make Content View
         editDialogView = new EditText(main);
+        editDialogView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         editDialogView.setText(item.getText());
         editDialogView.setSelection(item.getText().length());
         editDialogView.requestFocus();
         //contentView.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+
+        // 변경 감지시 시간 기록
+        if (PrefUtil.settingSavingTime == 1) {
+            PrefUtil.timePreserved = TimeUtil.getCurrentTime();
+        }
 
         // Make Dialog
         AlertDialog dialog = new AlertDialog.Builder(main)
@@ -420,8 +428,10 @@ public class ActionManager {
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        UIUtil.hideSoftInput(editDialogView);
-                        UIUtil.hideSoftInput(main.mInputText);
+                        if (!wasKeypadShown) {
+                            UIUtil.hideSoftInput(editDialogView);
+                            UIUtil.hideSoftInput(main.mInputText);
+                        }
                     }
                 })
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
@@ -432,8 +442,10 @@ public class ActionManager {
                         if (text.length() > 0) {
                             onEditConfirm(item, position, text);
                         }
-                        UIUtil.hideSoftInput(editDialogView);
-                        UIUtil.hideSoftInput(main.mInputText);
+                        if (!wasKeypadShown) {
+                            UIUtil.hideSoftInput(editDialogView);
+                            UIUtil.hideSoftInput(main.mInputText);
+                        }
                     }
                 })
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -458,10 +470,33 @@ public class ActionManager {
     }
 
     private void onEditConfirm(LogItem item, final int position, String text) {
-        item.setText(text);
-        main.mAdapter.notifyItemChanged(position);
-        main.mDatabase.updateText(item.getId(), text);
-        main.mRecView.startBlinkAnimation(position, true);
+        if (PrefUtil.settingEditTime) {
+            // 원래 아이템 제거
+            main.mAdapter.removeItem(position);
+            main.mDatabase.delete(item.getId());
+
+            // 아이템 수정
+            item.setId(main.mAdapter.getNewId());
+            item.setTime(TimeUtil.getSaveTime());
+            item.setText(text);
+
+            // 맨 아래에 추가
+            main.mDatabase.insertOfItem(item);
+            main.mAdapter.addItem(item);
+
+            // 스크롤 다운
+            main.mRecView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    main.mRecView.scrollToItemPosition(main.mAdapter.getItemCount() - 1, true);
+                }
+            }, 100);
+        } else {
+            item.setText(text);
+            main.mAdapter.notifyItemChanged(position);
+            main.mDatabase.updateText(item.getId(), text);
+            main.mRecView.startBlinkAnimation(position, true);
+        }
 
         // 수정 후 화면 밖으로 나가는 문제 해결
         main.mRecView.postDelayed(new Runnable() {
@@ -494,24 +529,34 @@ public class ActionManager {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private TextWatcher watcher1;
+
     private void onClickSetting() {
         final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout, main.mRootLayout, false);
 
         // 타임존
-        final Spinner spinner = contentView.findViewById(R.id.setting_timezone_spinner);
-        ArrayAdapter<CharSequence> spinnerAdapter = new ArrayAdapter<>(main, android.R.layout.simple_spinner_item, UTC_STRING);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinnerAdapter);
-        spinner.setSelection(UTC_INT.indexOf(PrefUtil.timeZoneOffset));
+        final Spinner spinnerTimezone = contentView.findViewById(R.id.setting_timezone_spinner);
+        ArrayAdapter<CharSequence> adapterTimezone = new ArrayAdapter<>(main, android.R.layout.simple_spinner_item, UTC_STRING);
+        adapterTimezone.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerTimezone.setAdapter(adapterTimezone);
+        spinnerTimezone.setSelection(UTC_INT.indexOf(PrefUtil.timeZoneOffset));
 
         // 타임존 버튼
         Button resetTimezoneButton = contentView.findViewById(R.id.setting_timezone_reset);
         resetTimezoneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                spinner.setSelection(UTC_INT.indexOf(PrefUtil.getDefaultTimeOffset()));
+                spinnerTimezone.setSelection(UTC_INT.indexOf(PrefUtil.getDefaultTimeOffset()));
             }
         });
+
+        // 저장 시점
+        final Spinner spinnerSaveTime = contentView.findViewById(R.id.setting_saving_time_spinner);
+        String[] savingTimeList = main.getResources().getStringArray(R.array.saving_time_list);
+        ArrayAdapter<String> adapterSaveTime = new ArrayAdapter<>(main, android.R.layout.simple_spinner_item, savingTimeList);
+        adapterSaveTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSaveTime.setAdapter(adapterSaveTime);
+        spinnerSaveTime.setSelection(PrefUtil.settingSavingTime);
 
         // 날짜 형식 버튼
         Button dateFormatChangeButton = contentView.findViewById(R.id.setting_button_date_format_change);
@@ -522,21 +567,28 @@ public class ActionManager {
             }
         });
 
+        // 바로가기 설정 버튼
+        Button shortcutSettingButton = contentView.findViewById(R.id.setting_button_shortcut_setting);
+        shortcutSettingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickShortcutSetting();
+            }
+        });
+
+        // 수정시 시간 갱신
+        final CheckBox checkBoxEditTime = contentView.findViewById(R.id.setting_edit_time);
+        checkBoxEditTime.setChecked(PrefUtil.settingEditTime);
+
+        // 화면 보안
+        final CheckBox screenSecure = contentView.findViewById(R.id.setting_secure);
+        screenSecure.setChecked(PrefUtil.getScreenSecure(main));
+
         // 키패드 예측
         if (Build.VERSION.SDK_INT >= 19) {
             CheckBox keypadPrediction = contentView.findViewById(R.id.setting_allow_keypad_prediction);
             keypadPrediction.setChecked(PrefUtil.onStartKeypad);
         }
-
-        // 화면 보안
-        final CheckBox screenSecure = contentView.findViewById(R.id.setting_secure);
-        screenSecure.setChecked(PrefUtil.getIsScreenSecure(main));
-
-        // 라벨 구분자
-        final EditText editTextLabelLeft = contentView.findViewById(R.id.setting_label_separator_left);
-        editTextLabelLeft.setText(PrefUtil.getLabelSeparatorLeft(main));
-        final EditText editTextLabelRight = contentView.findViewById(R.id.setting_label_separator_right);
-        editTextLabelRight.setText(PrefUtil.getLabelSeparatorRight(main));
 
         // 다이얼로그
         AlertDialog dialog = new AlertDialog.Builder(main)
@@ -546,7 +598,7 @@ public class ActionManager {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 타임존
-                        int offset = UTC_INT.get(spinner.getSelectedItemPosition());
+                        int offset = UTC_INT.get(spinnerTimezone.getSelectedItemPosition());
                         if (offset != PrefUtil.timeZoneOffset) {
                             PrefUtil.setTimeOffset(main, offset);
                             main.mAdapter.setItemList(main.mDatabase.load());
@@ -555,11 +607,38 @@ public class ActionManager {
                             undoItem.clear();
                         }
 
-                        // 키패드 예측
-                        if (Build.VERSION.SDK_INT >= 19) {
-                            CheckBox checkBox = contentView.findViewById(R.id.setting_allow_keypad_prediction);
-                            PrefUtil.setOnStartKeypad(main, checkBox.isChecked());
+                        // 저장 시점
+                        int settingSavingTime = spinnerSaveTime.getSelectedItemPosition();
+                        if (settingSavingTime != PrefUtil.settingSavingTime) {
+                            PrefUtil.setSettingSavingTime(main, settingSavingTime);
+                            if (!main.isSearchMode) {
+                                if (settingSavingTime == 1) {
+                                    watcher1 = new TextWatcher() {
+                                        int c = PrefUtil.getTextPreserved(main).length();
+                                        @Override
+                                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                                        @Override
+                                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                            if (c != s.length()) {
+                                                if (c == 0) {
+                                                    // 시간 저장
+                                                    PrefUtil.setTimePreserved(main, TimeUtil.getCurrentTime());
+                                                }
+                                                c = s.length();
+                                            }
+                                        }
+                                        @Override
+                                        public void afterTextChanged(Editable s) {}
+                                    };
+                                    main.mInputText.addTextChangedListener(watcher1);
+                                } else if (watcher1 != null) {
+                                    main.mInputText.removeTextChangedListener(watcher1);
+                                }
+                            }
                         }
+
+                        // 수정시 시간 갱신
+                        PrefUtil.setSettingEditTime(main, checkBoxEditTime.isChecked());
 
                         // 화면 보안
                         PrefUtil.setScreenSecure(main, screenSecure.isChecked());
@@ -569,9 +648,11 @@ public class ActionManager {
                             main.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
                         }
 
-                        // 라벨 구분자
-                        PrefUtil.setLabelSeparatorLeft(main, editTextLabelLeft.getText().toString());
-                        PrefUtil.setLabelSeparatorRight(main, editTextLabelRight.getText().toString());
+                        // 키패드 예측
+                        if (Build.VERSION.SDK_INT >= 19) {
+                            CheckBox checkBox = contentView.findViewById(R.id.setting_allow_keypad_prediction);
+                            PrefUtil.setOnStartKeypad(main, checkBox.isChecked());
+                        }
                     }
                 })
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -617,11 +698,45 @@ public class ActionManager {
         UIUtil.isPopupEditing = true;
     }
 
+    private void onClickShortcutSetting() {
+        final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout_shortcut_setting, main.mRootLayout, false);
+
+        // 라벨 구분자
+        final EditText editTextLabelLeft = contentView.findViewById(R.id.setting_label_separator_left);
+        editTextLabelLeft.setText(PrefUtil.getLabelSeparatorLeft(main));
+        final EditText editTextLabelRight = contentView.findViewById(R.id.setting_label_separator_right);
+        editTextLabelRight.setText(PrefUtil.getLabelSeparatorRight(main));
+
+        // 다이얼로그
+        AlertDialog dialog = new AlertDialog.Builder(main)
+                .setView(contentView)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 라벨 구분자
+                        PrefUtil.setLabelSeparatorLeft(main, editTextLabelLeft.getText().toString());
+                        PrefUtil.setLabelSeparatorRight(main, editTextLabelRight.getText().toString());
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        UIUtil.isPopupEditing = false;
+                    }
+                })
+                .create();
+        dialog.show();
+        UIUtil.isPopupEditing = true;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void onClickCreateShortcut() {
         // Make Content View
         final EditText editText = new EditText(main);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        editText.setSingleLine();
         editText.setHint(R.string.hint_label);
         editText.requestFocus();
 
@@ -684,6 +799,7 @@ public class ActionManager {
             Intent pinnedShortcutCallbackIntent = ShortcutManagerCompat.createShortcutResultIntent(main, pinShortcutInfo);
             PendingIntent successCallback = PendingIntent.getBroadcast(main, 0, pinnedShortcutCallbackIntent, 0);
             ShortcutManagerCompat.requestPinShortcut(main, pinShortcutInfo, successCallback.getIntentSender());
+            Toast.makeText(main, R.string.msg_shortcut_created, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -700,6 +816,8 @@ public class ActionManager {
         } else {
             // Make Content View
             final EditText editText = new EditText(main);
+            editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            editText.setSingleLine();
             editText.requestFocus();
 
             // Make Dialog
@@ -837,7 +955,7 @@ public class ActionManager {
         if (text != null) {
             String string = text.toString();
             if (string.length() > 0) {
-                item = main.mDatabase.insert(string);
+                item = main.mDatabase.insert(string, TimeUtil.getSaveTime());
                 main.mAdapter.addItem(item);
                 main.mInputText.getText().clear();
             }

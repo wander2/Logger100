@@ -21,6 +21,9 @@ public class PrefUtil {
         onStartKeypad = getOnStartKeypad(context);
         themeNumber = getThemeColorNumber(context);
         dateFormat = getDateFormat(context);
+        settingSavingTime = getSettingSavingTime(context);
+        timePreserved = getTimePreserved(context);
+        settingEditTime = getSettingEditTime(context);
         int currentVersion = getCurrentVersion(context);
         if (currentVersion < 109) {
             setCurrentVersion(context, 109);
@@ -195,7 +198,7 @@ public class PrefUtil {
 
     private static final String KEY_IS_SCREEN_SECURE = "is_screen_secure";
 
-    public static boolean getIsScreenSecure(Context context) {
+    public static boolean getScreenSecure(Context context) {
         return getPref(context).getBoolean(KEY_IS_SCREEN_SECURE, false);
     }
 
@@ -237,7 +240,7 @@ public class PrefUtil {
         return getPref(context).getString(KEY_HIDDEN_PASSWORD, "");
     }
 
-    public static void setHiddenPassword(Context context, String password) {
+    static void setHiddenPassword(Context context, String password) {
         getPref(context).edit().putString(KEY_HIDDEN_PASSWORD, password).apply();
     }
 
@@ -252,6 +255,54 @@ public class PrefUtil {
 
     public static void setTextPreserved(Context context, String text) {
         getPref(context).edit().putString(KEY_TEXT_PRESERVED, text).apply();
+    }
+
+
+
+
+
+
+    private static final String KEY_TIME_PRESERVED = "editTextTimePreserved";
+    public static int timePreserved;
+
+    private static int getTimePreserved(Context context) {
+        return getPref(context).getInt(KEY_TIME_PRESERVED, -1);
+    }
+
+    public static void setTimePreserved(Context context, int timePreserved) {
+        getPref(context).edit().putInt(KEY_TIME_PRESERVED, timePreserved).apply();
+        PrefUtil.timePreserved = timePreserved;
+    }
+
+
+
+
+
+    private static final String KEY_SETTING_SAVING_TIME = "setting_saving_time";
+    public static int settingSavingTime;
+
+    public static int getSettingSavingTime(Context context) {
+        return getPref(context).getInt(KEY_SETTING_SAVING_TIME, 0);
+    }
+
+    static void setSettingSavingTime(Context context, int settingSavingTime) {
+        getPref(context).edit().putInt(KEY_SETTING_SAVING_TIME, settingSavingTime).apply();
+        PrefUtil.settingSavingTime = settingSavingTime;
+    }
+
+
+
+
+    private static final String KEY_SETTING_EDIT_TIME = "setting_edit_time";
+    static boolean settingEditTime;
+
+    private static boolean getSettingEditTime(Context context) {
+        return getPref(context).getBoolean(KEY_SETTING_EDIT_TIME, false);
+    }
+
+    static void setSettingEditTime(Context context, boolean settingEditTime) {
+        getPref(context).edit().putBoolean(KEY_SETTING_EDIT_TIME, settingEditTime).apply();
+        PrefUtil.settingEditTime = settingEditTime;
     }
 
 }

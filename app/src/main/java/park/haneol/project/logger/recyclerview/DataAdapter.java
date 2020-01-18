@@ -93,10 +93,15 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
 
     public int searchNext() {
         if (itemList != bItemList) {
-            int lastId = itemList.getLastItem().getId();
-            focusPosition = bItemList.getPositionById(lastId);
-            itemList = bItemList;
-            return focusPosition;
+            LogItem lastItem = itemList.getLastItem();
+            if (lastItem != null) {
+                int lastId = lastItem.getId();
+                focusPosition = bItemList.getPositionById(lastId);
+                itemList = bItemList;
+                return focusPosition;
+            } else {
+                return -1;
+            }
         }
         focusPosition = itemList.getNextSearchPosition(focusPosition, searchString);
         return focusPosition;
@@ -295,6 +300,11 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
             return id;
         }
         return -1;
+    }
+
+    public int getNewId() {
+        LogItem item = bItemList.getLastItem();
+        return item.getId() + 1;
     }
 
 }
