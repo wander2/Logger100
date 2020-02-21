@@ -53,8 +53,8 @@ public class LogItem extends BaseItem {
         this.text = text;
     }
 
-    public void setFlag(int flag) {
-        this.flag = flag;
+    public void toggleHighlight() {
+        flag = flag == 1 ? 0 : 1;
     }
 
     public int getDays() {

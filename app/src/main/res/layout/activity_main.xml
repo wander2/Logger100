@@ -8,17 +8,24 @@
     android:layout_height="match_parent"
     tools:context=".component.MainActivity">
 
+
+    <!--android:scrollbars="vertical"-->
     <park.haneol.project.logger.recyclerview.RecView
         android:id="@+id/rec_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scrollbars="vertical"
         android:fadeScrollbars="true"
         android:isScrollContainer="true"
+
         app:layout_constraintBottom_toTopOf="@id/edit_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:fastScrollEnabled="true"
+        app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
+        app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
+        app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
+        app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
         tools:listitem="@layout/item_view" />
 
     <park.haneol.project.logger.view.InputText

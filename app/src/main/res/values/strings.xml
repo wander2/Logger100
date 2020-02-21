@@ -8,8 +8,8 @@
 
     <string name="edit_time">Update time when editing</string>
 
-    <string name="move_hidden_return">Return</string>
-    <string name="move_hidden">Hide</string>
+    <string name="reveal">Reveal</string>
+    <string name="hide">Hide</string>
     <string name="hidden">Hidden</string>
     <string name="change_password">Change password</string>
 
@@ -62,7 +62,7 @@
     <string name="right">Right</string>
 
     <string name="change_time">Change Time</string>
-    <string name="move">Open link</string>
+    <string name="open_link">Open link</string>
     <string name="shortcut_setting">Shortcut setting</string>
     <string name="saving_time_setting">Saving time</string>
 

@@ -123,7 +123,7 @@ public class ShortcutActivity extends AppCompatActivity {
         }
 
         Database database = new Database(this, Database.DATABASE_NAME);
-        LogItem item = database.insert(text, TimeUtil.getSaveTime());
+        LogItem item = database.append(text, TimeUtil.getSaveTime());
 
         MainActivity activity = ActivityObserver.getInstance().getActivity();
         if (activity != null) {

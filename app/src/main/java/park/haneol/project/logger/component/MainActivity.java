@@ -212,23 +212,7 @@ public class MainActivity extends AppCompatActivity {
 
             // (저장시점 설정시) 입력창 변경 -> 길이가 0이면 저장시간 초기화
             if (PrefUtil.settingSavingTime == 1) {
-                mInputText.addTextChangedListener(new TextWatcher() {
-                    int c = PrefUtil.getTextPreserved(MainActivity.this).length();
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if (c != s.length()) {
-                            if (c == 0) {
-                                // 시간 저장
-                                PrefUtil.setTimePreserved(MainActivity.this, TimeUtil.getCurrentTime());
-                            }
-                            c = s.length();
-                        }
-                    }
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-                });
+                mInputText.addTimeRecordTextWatcher();
             }
         }
 
@@ -276,12 +260,15 @@ public class MainActivity extends AppCompatActivity {
                 });
                 int editPosition = savedInstanceState.getInt(RESTORE_EDIT_POSITION);
                 if (editPosition != -1) {
-                    String editDialogText = savedInstanceState.getString(RESTORE_EDIT_DIALOG_TEXT);
-                    int editDialogSelection = savedInstanceState.getInt(RESTORE_EDIT_DIALOG_SELECTION);
-                    if (editDialogText != null) {
-                        mActionManager.onClickEdit(editPosition);
-                        mActionManager.editDialogView.setText(editDialogText);
-                        mActionManager.editDialogView.setSelection(editDialogSelection);
+                    LogItem editItem = (LogItem) mAdapter.getItemAt(editPosition);
+                    if (editItem != null) {
+                        String editDialogText = savedInstanceState.getString(RESTORE_EDIT_DIALOG_TEXT);
+                        if (editDialogText != null) {
+                            int editDialogSelection = savedInstanceState.getInt(RESTORE_EDIT_DIALOG_SELECTION);
+                            mActionManager.showChangeItemTextDialog(editPosition, editItem);
+                            mActionManager.editDialogView.setText(editDialogText);
+                            mActionManager.editDialogView.setSelection(editDialogSelection);
+                        }
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package park.haneol.project.logger.util;
 
 import android.content.Context;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.view.ContextThemeWrapper;
@@ -18,22 +19,32 @@ class PopupMenuManager {
         this.main = main;
     }
 
-    void showPopupMenu(View anchor, int[] titleRes, PopupMenu.OnMenuItemClickListener listener) {
-        showPopupMenu(main, anchor, titleRes, listener);
+    void showPopupMenu(View anchor, final MenuFunction... menuFunctions) {
+        showPopupMenu(main, anchor, menuFunctions);
     }
 
-    void showPopupMenuDark(View anchor, int[] titleRes, PopupMenu.OnMenuItemClickListener listener) {
+    void showPopupMenuDark(View anchor, final MenuFunction... menuFunctions) {
         Context wrapper = new ContextThemeWrapper(main, R.style.DarkPopupMenuTheme);
-        showPopupMenu(wrapper, anchor, titleRes, listener);
+        showPopupMenu(wrapper, anchor, menuFunctions);
     }
 
-    private void showPopupMenu(Context context, View anchor, int[] titleRes, PopupMenu.OnMenuItemClickListener listener) {
+    private void showPopupMenu(Context context, View anchor, final MenuFunction... menuFunctions) {
         clearPopupMenu();
         popupMenu = new PopupMenu(context, anchor);
-        for (int i = 0; i < titleRes.length; i++) {
-            popupMenu.getMenu().add(0, i, i, titleRes[i]);
+        for (int i = 0; i < menuFunctions.length; i++) {
+            popupMenu.getMenu().add(0, i, i, menuFunctions[i].titleRes);
         }
-        popupMenu.setOnMenuItemClickListener(listener);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                for (int i = 0; i < menuFunctions.length; i++) {
+                    if (i == item.getItemId()) {
+                        menuFunctions[i].function.run();
+                    }
+                }
+                return false;
+            }
+        });
         popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
             @Override
             public void onDismiss(PopupMenu menu) {
@@ -48,6 +59,11 @@ class PopupMenuManager {
             popupMenu.dismiss();
             popupMenu = null;
         }
+    }
+
+    static class MenuFunction {
+        int titleRes;
+        Runnable function;
     }
 
 }

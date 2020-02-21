@@ -13,10 +13,8 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -32,7 +30,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.FileProvider;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
@@ -53,45 +50,31 @@ import park.haneol.project.logger.component.ShortcutActivity;
 import park.haneol.project.logger.item.BaseItem;
 import park.haneol.project.logger.item.DateItem;
 import park.haneol.project.logger.item.LogItem;
+import park.haneol.project.logger.recyclerview.DataAdapter;
 
 public class ActionManager {
 
+    // 수정 기능에 사용됨
     public EditText editDialogView;
     public int editPosition = -1;
 
+    // 필요 변수
     private MainActivity main;
     private PopupMenuManager popupMenuManager;
 
+    // 사용 변수
     private UndoItem undoItem = new UndoItem();
     private ThemeAnimation themeAnimation = new ThemeAnimation();
 
-    private static List<Integer> UTC_INT = Arrays.asList(
-            -720, -660, -600, -570, -540, -480, -420, -360,
-            -300, -240, -210, -180, -150, -120, -60, 0,
-            +60, +120, +180, +210, +240, +270, +300, +330,
-            +345, +360, +390, +420, +480, +525, +540, +570,
-            +600, +630, +660, +690, +720, +765, +780, +825,
-            +840);
-
-    private static CharSequence[] UTC_STRING = {"UTC -12",
-            "UTC -11", "UTC -10", "UTC -9:30", "UTC -9",
-            "UTC -8", "UTC -7", "UTC -6", "UTC -5",
-            "UTC -4", "UTC -3:30", "UTC -3", "UTC -2:30",
-            "UTC -2", "UTC -1", "UTC 0", "UTC +1",
-            "UTC +2", "UTC +3", "UTC +3:30", "UTC +4",
-            "UTC +4:30", "UTC +5", "UTC +5:30", "UTC +5:45",
-            "UTC +6", "UTC +6:30", "UTC +7", "UTC +8",
-            "UTC +8:45", "UTC +9", "UTC +9:30", "UTC +10",
-            "UTC +10:30", "UTC +11", "UTC +11:30", "UTC +12",
-            "UTC +12:45", "UTC +13", "UTC +13:45", "UTC +14"};
-
+    // 생성자
     public ActionManager(MainActivity main) {
+        // 필요 변수
         this.main = main;
         this.popupMenuManager = new PopupMenuManager(main);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 아이템 클릭해서 메뉴 열리는 함수
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onClickLogItem(final int position, View anchor) {
@@ -99,69 +82,32 @@ public class ActionManager {
         if (item == null) {
             return;
         }
+        final String link = getLink(item.getText());
+        if (link != null) {
+            popupMenuManager.showPopupMenu(anchor,
+                    new OpenLink(link),
+                    new ToggleHighlight(position, item),
+                    new ChangeItemText(position, item),
+                    new RemoveItem(position, item)
+            );
+        } else {
+            popupMenuManager.showPopupMenu(anchor,
+                    new ToggleHighlight(position, item),
+                    new ChangeItemText(position, item),
+                    new RemoveItem(position, item)
+            );
+        }
+    }
 
-        String[] split = item.getText().split("\n");
-        String linkText1 = null;
-        for (String trimmed: split) {
-            trimmed = trimmed.trim();
-            if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-                linkText1 = trimmed;
-                break;
+    private String getLink(String text) {
+        String[] split = text.split("\n");
+        for (String line: split) {
+            line = line.trim();
+            if (line.startsWith("http://") || line.startsWith("https://")) {
+                return line;
             }
         }
-        final String linkText = linkText1;
-
-        if (linkText != null) {
-            int[] titleRes = {
-                    R.string.move,
-                    item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
-                    R.string.edit,
-                    R.string.remove
-            };
-            popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    switch (menuItem.getItemId()) {
-                        case 0:
-                            onClickLink(linkText);
-                            return true;
-                        case 1:
-                            onClickHighlight(position);
-                            return true;
-                        case 2:
-                            onClickEdit(position);
-                            return true;
-                        case 3:
-                            onClickRemove(position);
-                            return true;
-                    }
-                    return false;
-                }
-            });
-        } else {
-            int[] titleRes = {
-                    item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight,
-                    R.string.edit,
-                    R.string.remove
-            };
-            popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    switch (menuItem.getItemId()) {
-                        case 0:
-                            onClickHighlight(position);
-                            return true;
-                        case 1:
-                            onClickEdit(position);
-                            return true;
-                        case 2:
-                            onClickRemove(position);
-                            return true;
-                    }
-                    return false;
-                }
-            });
-        }
+        return null;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,32 +117,19 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        int[] titleRes = {
-                R.string.copy,
-                R.string.share,
-                main instanceof HiddenActivity ? R.string.move_hidden_return : R.string.move_hidden
-        };
-        popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case 0:
-                        copy(item.getText());
-                        return true;
-                    case 1:
-                        share(item.getText());
-                        return true;
-                    case 2:
-                        if (main instanceof HiddenActivity) {
-                            onClickHideReturn(position);
-                        } else {
-                            onClickHide(position);
-                        }
-                        return true;
-                }
-                return false;
-            }
-        });
+        if (main instanceof HiddenActivity) {
+            popupMenuManager.showPopupMenuDark(anchor,
+                    new CopyText(item.getText()),
+                    new ShareText(item.getText()),
+                    new RevealItem(position, item)
+            );
+        } else {
+            popupMenuManager.showPopupMenuDark(anchor,
+                    new CopyText(item.getText()),
+                    new ShareText(item.getText()),
+                    new HideItem(position, item)
+            );
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -206,71 +139,117 @@ public class ActionManager {
         if (item == null) {
             return;
         }
-        int[] titleRes = {
-                R.string.copy_all,
-                R.string.share_all,
-                R.string.remove_all
-        };
-        popupMenuManager.showPopupMenuDark(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case 0:
-                        copy(getDateSpan(item, position + 1));
-                        return true;
-                    case 1:
-                        share(getDateSpan(item, position + 1));
-                        return true;
-                    case 2:
-                        onClickDateRemove(position);
-                        return true;
-                }
-                return false;
+        popupMenuManager.showPopupMenuDark(anchor,
+                new CopyTextInDate(position, item),
+                new ShareTextInDate(position, item),
+                new RemoveItemsInDate(position)
+        );
+    }
+
+    private String getTextInDate(int position, DateItem dateItem) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dateItem.getDateString());
+        BaseItem item;
+        while (true) {
+            position += 1;
+            item = main.mAdapter.getItemAt(position);
+            if (!(item instanceof LogItem)) {
+                break;
             }
-        });
+            sb.append("\r\n");
+            sb.append(((LogItem) item).getTimeString());
+            sb.append(((LogItem) item).getText().replace("\n", "\r\n      "));
+        }
+        return sb.toString();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 메뉴 버튼 클릭
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void onClickMenu(View anchor) {
+        if (main instanceof HiddenActivity) {
+            popupMenuManager.showPopupMenuDark(anchor,
+                    new OpenSetting(),
+                    new ExportBackupFile(),
+                    new CreateShortcut(),
+                    new ChangePassword()
+            );
+        } else {
+            popupMenuManager.showPopupMenu(anchor,
+                    new OpenSetting(),
+                    new ExportBackupFile(),
+                    new CreateShortcut(),
+                    new StartHiddenActivity()
+            );
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void onClickMenu(View anchor) {
-        int[] titleRes = {
-                R.string.setting,
-                R.string.backup,
-                R.string.shortcut,
-                (main instanceof HiddenActivity) ? R.string.change_password : R.string.hidden
-        };
-        popupMenuManager.showPopupMenu(anchor, titleRes, new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case 0:
-                        onClickSetting();
-                        return true;
-                    case 1:
-                        exportFullBackupFile();
-                        return true;
-                    case 2:
-                        onClickCreateShortcut();
-                        return true;
-                    case 3:
-                        if (main instanceof HiddenActivity) {
-                            onClickChangePassword();
-                        } else {
-                            onClickHidden();
-                        }
-                        return true;
-                }
-                return false;
-            }
-        });
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 아이템 시간 클릭
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onClickTime(final int position) {
         final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
         if (item == null) {
             return;
         }
+        showChangeItemTimeDialog(position, item);
+    }
 
+    private void showChangeItemTimeDialog(final int position, final LogItem item) {
         // 변수
         int dayMinutes = TimeUtil.getLocalDayMinutes(item.getTime());
         final int[] date = TimeUtil.getEach(item.getTime()); // 날짜 정보 저장 변수
@@ -290,34 +269,15 @@ public class ActionManager {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 시간
-                        int afterTime = TimeUtil.toSystemTime(date, hm);
+                        int toTime = TimeUtil.toSystemTime(date, hm);
 
                         // 현재 시간 넘으면 현재 시간으로
                         int currentTime = TimeUtil.getCurrentTime();
-                        if (afterTime > currentTime) {
-                            afterTime = currentTime;
+                        if (toTime > currentTime) {
+                            toTime = currentTime;
                         }
 
-                        // 지우고 삽입위치 탐색
-                        main.mAdapter.removeItem(position);
-                        int[] betweenIds = main.mAdapter.timeInsertFindBetween(afterTime);
-
-                        // 삽입위치, 밀려나는 위치
-                        int afterId = betweenIds[0] + 1;
-                        int pushUntilId = main.mAdapter.timeInsertFindPushUntil(betweenIds);
-
-                        // 데이터베이스
-                        main.mDatabase.changeItemTime(item.getId(), afterTime, afterId, pushUntilId);
-
-                        // 리로드
-                        main.mAdapter.setItemList(main.mDatabase.load());
-                        main.mAdapter.update(main.isSearchMode);
-
-                        // 해당 위치로 스크롤
-                        main.mRecView.scrollToItemPosition(main.mAdapter.getPositionById(afterId));
-
-                        // 아이디가 변했으므로 클리어
-                        undoItem.clear();
+                        changeItemTime(position, item, toTime);
                     }
                 }).create();
 
@@ -378,6 +338,48 @@ public class ActionManager {
         dialog.show();
     }
 
+    private void changeItemTime(int position, LogItem item, int toTime) {
+        int originalId = item.getId();
+        int originalTime = item.getTime();
+
+        // 지우고 삽입위치 탐색
+        main.mAdapter.removeItem(position);
+        int[] betweenIds = main.mAdapter.timeInsertFindBetween(toTime);
+
+        // 삽입위치, 밀려나는 위치
+        int toId = betweenIds[0] + 1;
+        int pushUntilId = main.mAdapter.timeInsertFindPushUntil(betweenIds);
+
+        // 데이터베이스
+        if (pushUntilId == -1) {
+            main.mDatabase.updateId(item.getId(), toId);
+            main.mDatabase.updateTime(toId, toTime);
+        } else {
+            int pushCount = pushUntilId - toId;
+            boolean res = main.mDatabase.pushId(item.getId(), toId, toId, pushCount);
+            if (res) {
+                main.mDatabase.updateTime(toId, toTime);
+            }
+        }
+
+        // 리로드
+        main.mAdapter.setItemList(main.mDatabase.load());
+        main.mAdapter.update(main.isSearchMode);
+
+        // 해당 위치로 스크롤
+        main.mRecView.scrollToItemPosition(main.mAdapter.getPositionById(toId));
+
+        // 되돌리기 TODO
+        // 시간 변경 이전으로 되돌림
+        // 되돌리기 이후 다시 해당 시간으로 변경하는 모드로 변경
+        //undoItem.setMode(UNDO_MODE_RESTORE_TIME_CHANGE);
+        //undoItem.setItem(item);
+        //undoItem.setId(originalId);
+        //undoItem.setTime(originalTime);
+        //undoItem.setPosition(position);
+        undoItem.clear();
+    }
+
     private Spannable blueString(String string) {
         SpannableString spannable = new SpannableString(string);
         spannable.setSpan(new ForegroundColorSpan(Color.BLUE), 0, string.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -385,8 +387,51 @@ public class ActionManager {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -397,20 +442,259 @@ public class ActionManager {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 기본 버튼
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void onClickEdit(final int position) {
-        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
-        if (item == null) {
-            return;
+    public void onClickSaveButton() {
+        LogItem item = null;
+        Editable text = main.mInputText.getText();
+        if (text != null) {
+            String string = text.toString();
+            if (string.length() > 0) {
+                item = main.mDatabase.append(string, TimeUtil.getSaveTime());
+                main.mAdapter.addItem(item);
+                main.mInputText.getText().clear();
+            }
+            main.mRecView.scrollDown();
+            if (undoItem.exist() && item != null) {
+                if (undoItem.item.getId() == item.getId()) {
+                    undoItem.clear();
+                }
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void onClickTheme() {
+        PrefUtil.toggleThemeColorNumber(main);
+        ColorUtil.themeToggled(main);
+        themeAnimation.interStart = ColorUtil.currentInter;
+        main.mRootLayout.startAnimation(themeAnimation);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 되돌리기
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class UndoItem {
+        LogItem item = null;
+
+        void set(LogItem item) {
+            this.item = item;
+            main.mUndoButton.setVisibility(View.VISIBLE);
         }
 
+        // TODO : visible 관련 설정 필요없으면 제거
+        void clear() {
+            main.mUndoButton.setVisibility(View.GONE);
+            this.item = null;
+        }
+
+        boolean exist() {
+            return item != null;
+        }
+    }
+
+    // TODO
+    public void onClickUndo() {
+        if (undoItem.exist()) {
+            int position = main.mAdapter.restoreItem(undoItem.item);
+            main.mDatabase.insertItem(undoItem.item);
+            main.mRecView.scrollToItemPosition(position);
+
+            // todo
+            undoItem.clear();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 아이템 종속 함수
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class OpenLink extends PopupMenuManager.MenuFunction {
+        OpenLink(final String link) {
+            titleRes = R.string.open_link;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    openLink(link);
+                }
+            };
+        }
+    }
+
+    private void openLink(String link) {
+        if (link != null) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+            main.startActivity(intent);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class RemoveItem extends PopupMenuManager.MenuFunction {
+        RemoveItem(final int position, final LogItem item) {
+            titleRes = R.string.remove;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    removeItem(position, item);
+                }
+            };
+        }
+    }
+
+    private void removeItem(int position, LogItem item) {
+        main.mAdapter.removeItem(position);
+        undoItem.set(item);
+        main.mDatabase.delete(item.getId());
+
+        // 되돌리기 TODO
+        // 제거된 아이템을 되돌림, 점유시 push
+        // 되돌리기 후 다시 제거하는 모드로 변경
+        //undoItem.setMode(UNDO_MODE_RESTORE_REMOVE);
+        //undoItem.setItem(item);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class ToggleHighlight extends PopupMenuManager.MenuFunction {
+        ToggleHighlight(final int position, final LogItem item) {
+            titleRes = item.getFlag() == 1 ? R.string.remove_highlight : R.string.highlight;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    toggleHighlight(position, item);
+                }
+            };
+        }
+    }
+
+    private void toggleHighlight(int position, LogItem item) {
+        item.toggleHighlight();
+        main.mAdapter.notifyItemChanged(position);
+        main.mDatabase.updateFlag(item.getId(), item.getFlag());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class ChangeItemText extends PopupMenuManager.MenuFunction {
+        ChangeItemText(final int position, final LogItem item) {
+            titleRes = R.string.edit;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    showChangeItemTextDialog(position, item);
+                }
+            };
+        }
+    }
+
+    public void showChangeItemTextDialog(final int position, final LogItem item) {
         final boolean wasKeypadShown = UIUtil.keypadShown;
 
         // Make Content View
         editDialogView = new EditText(main);
-        editDialogView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        editDialogView.setSingleLine(false);
+        editDialogView.setInputType(editDialogView.getInputType() | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         editDialogView.setText(item.getText());
         editDialogView.setSelection(item.getText().length());
         editDialogView.requestFocus();
@@ -440,7 +724,7 @@ public class ActionManager {
                         // 작동 조건
                         String text = editDialogView.getText().toString();
                         if (text.length() > 0) {
-                            onEditConfirm(item, position, text);
+                            onConfirmChangeItemText(item, position, text);
                         }
                         if (!wasKeypadShown) {
                             UIUtil.hideSoftInput(editDialogView);
@@ -469,33 +753,11 @@ public class ActionManager {
         UIUtil.isPopupEditing = true;
     }
 
-    private void onEditConfirm(LogItem item, final int position, String text) {
+    private void onConfirmChangeItemText(LogItem item, final int position, String text) {
         if (PrefUtil.settingEditTime) {
-            // 원래 아이템 제거
-            main.mAdapter.removeItem(position);
-            main.mDatabase.delete(item.getId());
-
-            // 아이템 수정
-            item.setId(main.mAdapter.getNewId());
-            item.setTime(TimeUtil.getSaveTime());
-            item.setText(text);
-
-            // 맨 아래에 추가
-            main.mDatabase.insertOfItem(item);
-            main.mAdapter.addItem(item);
-
-            // 스크롤 다운
-            main.mRecView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    main.mRecView.scrollToItemPosition(main.mAdapter.getItemCount() - 1, true);
-                }
-            }, 100);
+            changeItemTextAndUpdate(position, item, text);
         } else {
-            item.setText(text);
-            main.mAdapter.notifyItemChanged(position);
-            main.mDatabase.updateText(item.getId(), text);
-            main.mRecView.startBlinkAnimation(position, true);
+            changeItemText(position, item, text);
         }
 
         // 수정 후 화면 밖으로 나가는 문제 해결
@@ -527,11 +789,405 @@ public class ActionManager {
         }, 100);
     }
 
+    private void changeItemTextAndUpdate(int position, LogItem item, String text) {
+        int originalId = item.getId();
+        String originalText = item.getText();
+        int originalTime = item.getTime();
+
+        // 원래 아이템 제거
+        main.mAdapter.removeItem(position);
+
+        // 데이터베이스
+        int newId = main.mAdapter.getNewId();
+        if (main.mDatabase.existId(newId)) {
+            newId += 1;
+        }
+        int time = TimeUtil.getSaveTime();
+        main.mDatabase.updateId(originalId, newId);
+        main.mDatabase.updateTime(newId, time);
+        main.mDatabase.updateText(newId, text);
+
+        // 맨 아래에 추가
+        item.setId(newId);
+        item.setTime(time);
+        item.setText(text);
+        main.mAdapter.addItem(item);
+
+        // 스크롤 다운
+        main.mRecView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                main.mRecView.scrollToItemPosition(main.mAdapter.getItemCount() - 1, true);
+            }
+        }, 100);
+
+        // 되돌리기 TODO
+        // 수정해서 밑으로 내려간 항목을 원래 위치로 되돌림 text + id, time, position
+        // 변경된 텍스트도 되돌림
+        // 되돌리기 후 다시 내리고 텍스트도 변경하는 모드로 변경
+        //undoItem.setMode(UNDO_MODE_RESTORE_EDIT_UPDATE);
+        //undoItem.setItem(item);
+        //undoItem.setText(originalText);
+        //undoItem.setId(originalId);
+        //undoItem.setTime(originalTime);
+        //undoItem.setPosition(position);
+        undoItem.clear();
+    }
+
+    private void changeItemText(int position, LogItem item, String text) {
+        String originalText = item.getText();
+
+        // 메모리 설정
+        item.setText(text);
+
+        // 메모리 설정 반영
+        main.mAdapter.notifyItemChanged(position);
+
+        // 데이터베이스 저장
+        main.mDatabase.updateText(item.getId(), text);
+
+        // 스크롤 효과
+        main.mRecView.startBlinkAnimation(position, true);
+
+        // 되돌리기 TODO
+        // 수정 전 텍스트로 변경
+        // 되돌리기 후 수정 후 텍스트로 다시 변경하는 모드로 변경
+        //undoItem.setMode(UNDO_MODE_RESTORE_EDIT);
+        //undoItem.setItem(item);
+        //undoItem.setText(originalText);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private TextWatcher watcher1;
+    private class CopyText extends PopupMenuManager.MenuFunction {
+        CopyText(final String text) {
+            titleRes = R.string.copy;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    copyText(text);
+                }
+            };
+        }
+    }
 
-    private void onClickSetting() {
+    private void copyText(String text) {
+        if (text != null) {
+            ClipboardManager clipboard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                ClipData clip = ClipData.newPlainText("content", text);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(main, R.string.copy_message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class ShareText extends PopupMenuManager.MenuFunction {
+        ShareText(final String text) {
+            titleRes = R.string.share;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    shareText(text);
+                }
+            };
+        }
+    }
+
+    private void shareText(String text) {
+        if (text != null) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, text);
+            main.startActivity(Intent.createChooser(intent, main.getString(R.string.share)));
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class HideItem extends PopupMenuManager.MenuFunction {
+        HideItem(final int position, final LogItem item) {
+            titleRes = R.string.hide;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    hideItem(position, item);
+                }
+            };
+        }
+    }
+
+    private void hideItem(int position, LogItem item) {
+        int id = item.getId();
+
+        // 기본에서 지움
+        main.mAdapter.removeItem(position);
+        main.mDatabase.delete(item.getId());
+
+        // 숨김 데이터베이스 오픈
+        Database databaseHidden = new Database(main, Database.DATABASE_NAME_HIDDEN);
+        DataAdapter adapterHidden = new DataAdapter(main);
+        adapterHidden.setItemList(databaseHidden.load());
+
+        // 숨김에서 삽입위치 탐색
+        int toTime = item.getTime();
+        int[] betweenIds = adapterHidden.timeInsertFindBetween(toTime);
+
+        // 삽입위치, 밀려나는 위치
+        int toId = betweenIds[0] + 1;
+        int pushUntilId = adapterHidden.timeInsertFindPushUntil(betweenIds);
+
+        // 데이터베이스
+        if (pushUntilId == -1) {
+            item.setId(toId);
+            databaseHidden.insertItem(item);
+        } else {
+            int pushCount = pushUntilId - toId;
+            boolean res = databaseHidden.pushId(toId, pushCount);
+            if (res) {
+                item.setId(toId);
+                databaseHidden.insertItem(item);
+            }
+        }
+
+        // 되돌리기 TODO
+        // item: hidden 으로 이동된 아이템
+        // position: 이동 전 position
+        // id: 이동 전 id
+        // => 이동된 아이템을 hidden 데이터베이스에서 제거 후 default 데이터베이스로 이동하고 원래 id 로 변경해 position 에 삽입한다.
+        // 점유시 push
+        // 되돌리기 후 다시 보내는 모드로 변경
+        //undoItem.setMode(UNDO_MODE_RESTORE_HIDE);
+        //undoItem.setPosition(position);
+        //undoItem.setItem(item);
+        //undoItem.setId(id);
+        undoItem.clear();
+
+        // 데이터베이스 닫기
+        databaseHidden.close();
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+
+    private class RevealItem extends PopupMenuManager.MenuFunction {
+        RevealItem(final int position, final LogItem item) {
+            titleRes = R.string.reveal;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    revealItem(position, item);
+                }
+            };
+        }
+    }
+
+    private void revealItem(int position, LogItem item) {
+        int id = item.getId();
+
+        // 기본에서 지움
+        main.mAdapter.removeItem(position);
+        main.mDatabase.delete(item.getId());
+
+        // 숨김 데이터베이스 오픈
+        Database databaseDefault = new Database(main, Database.DATABASE_NAME);
+        DataAdapter adapterDefault = new DataAdapter(main);
+        adapterDefault.setItemList(databaseDefault.load());
+
+        // 숨김에서 삽입위치 탐색
+        int toTime = item.getTime();
+        int[] betweenIds = adapterDefault.timeInsertFindBetween(toTime);
+
+        // 삽입위치, 밀려나는 위치
+        int toId = betweenIds[0] + 1;
+        int pushUntilId = adapterDefault.timeInsertFindPushUntil(betweenIds);
+
+        // 데이터베이스
+        if (pushUntilId == -1) {
+            item.setId(toId);
+            databaseDefault.insertItem(item);
+        } else {
+            int pushCount = pushUntilId - toId;
+            boolean res = databaseDefault.pushId(toId, pushCount);
+            if (res) {
+                item.setId(toId);
+                databaseDefault.insertItem(item);
+            }
+        }
+
+        // 되돌리기 TODO
+        // item: default 로 이동된 아이템
+        // position: 이동 전 position
+        // id: 이동 전 id
+        // => 이동된 아이템을 default 데이터베이스에서 제거 후 hidden 데이터베이스로 이동하고 원래 id 로 변경해 position 에 삽입한다.
+        // 점유시 push
+        // 되돌리기 후 다시 보내는 모드로 변경
+        //undoItem.setMode(UNDO_MODE_RESTORE_REVEAL);
+        //undoItem.setPosition(position);
+        //undoItem.setItem(item);
+        //undoItem.setId(id);
+        undoItem.clear();
+
+        // 데이터베이스 닫기
+        databaseDefault.close();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class CopyTextInDate extends PopupMenuManager.MenuFunction {
+        CopyTextInDate(final int position, final DateItem item) {
+            titleRes = R.string.copy_all;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    copyText(getTextInDate(position, item));
+                }
+            };
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class ShareTextInDate extends PopupMenuManager.MenuFunction {
+        ShareTextInDate(final int position, final DateItem item) {
+            titleRes = R.string.share_all;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    shareText(getTextInDate(position, item));
+                }
+            };
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class RemoveItemsInDate extends PopupMenuManager.MenuFunction {
+        RemoveItemsInDate(final int position) {
+            titleRes = R.string.remove_all;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    removeItemsInDate(position);
+                }
+            };
+        }
+    }
+
+    private void removeItemsInDate(final int position) {
+        final ArrayList<Integer> idList = main.mAdapter.getIdsInDate(position);
+        AlertDialog dialog = new AlertDialog.Builder(main)
+                .setTitle(R.string.remove)
+                .setMessage(main.getString(R.string.remove_date_message, idList.size()))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ArrayList<LogItem> items = main.mAdapter.removeItems(idList);
+                        main.mDatabase.delete(idList);
+
+                        // 되돌리기 TODO
+                        // 제거한 아이템들을 복원함
+                        // 복원 중 id가 겹칠 경우 push
+                        // 되돌리기 후 다시 제거하는 모드로 변경
+                        //undoItem.setMode(UNDO_MODE_RESTORE_REMOVE_ITEMS);
+                        //undoItem.setItems(items);
+                    }
+                })
+                .create();
+        dialog.show();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 메뉴 관련 함수
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // 시간대: 수
+    private static List<Integer> UTC_INT = Arrays.asList(
+            -720, -660, -600, -570, -540, -480, -420, -360,
+            -300, -240, -210, -180, -150, -120, -60, 0,
+            +60, +120, +180, +210, +240, +270, +300, +330,
+            +345, +360, +390, +420, +480, +525, +540, +570,
+            +600, +630, +660, +690, +720, +765, +780, +825,
+            +840);
+
+    // 시간대: 텍스트
+    private static CharSequence[] UTC_STRING = {"UTC -12",
+            "UTC -11", "UTC -10", "UTC -9:30", "UTC -9",
+            "UTC -8", "UTC -7", "UTC -6", "UTC -5",
+            "UTC -4", "UTC -3:30", "UTC -3", "UTC -2:30",
+            "UTC -2", "UTC -1", "UTC 0", "UTC +1",
+            "UTC +2", "UTC +3", "UTC +3:30", "UTC +4",
+            "UTC +4:30", "UTC +5", "UTC +5:30", "UTC +5:45",
+            "UTC +6", "UTC +6:30", "UTC +7", "UTC +8",
+            "UTC +8:45", "UTC +9", "UTC +9:30", "UTC +10",
+            "UTC +10:30", "UTC +11", "UTC +11:30", "UTC +12",
+            "UTC +12:45", "UTC +13", "UTC +13:45", "UTC +14"};
+
+    private class OpenSetting extends PopupMenuManager.MenuFunction {
+        OpenSetting() {
+            titleRes = R.string.setting;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    showSettingDialog();
+                }
+            };
+        }
+    }
+
+    private void showSettingDialog() {
         final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout, main.mRootLayout, false);
 
         // 타임존
@@ -563,7 +1219,7 @@ public class ActionManager {
         dateFormatChangeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickDateFormatChange();
+                showDateFormatChangeDialog();
             }
         });
 
@@ -572,7 +1228,7 @@ public class ActionManager {
         shortcutSettingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickShortcutSetting();
+                showShortcutSettingDialog();
             }
         });
 
@@ -604,6 +1260,8 @@ public class ActionManager {
                             main.mAdapter.setItemList(main.mDatabase.load());
                             main.mAdapter.update(main.isSearchMode);
                             main.mRecView.scrollDown();
+
+                            // todo 시간대 변경하면 item.time이 바뀔 수 있다
                             undoItem.clear();
                         }
 
@@ -613,26 +1271,9 @@ public class ActionManager {
                             PrefUtil.setSettingSavingTime(main, settingSavingTime);
                             if (!main.isSearchMode) {
                                 if (settingSavingTime == 1) {
-                                    watcher1 = new TextWatcher() {
-                                        int c = PrefUtil.getTextPreserved(main).length();
-                                        @Override
-                                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                                        @Override
-                                        public void onTextChanged(CharSequence s, int start, int before, int count) {
-                                            if (c != s.length()) {
-                                                if (c == 0) {
-                                                    // 시간 저장
-                                                    PrefUtil.setTimePreserved(main, TimeUtil.getCurrentTime());
-                                                }
-                                                c = s.length();
-                                            }
-                                        }
-                                        @Override
-                                        public void afterTextChanged(Editable s) {}
-                                    };
-                                    main.mInputText.addTextChangedListener(watcher1);
-                                } else if (watcher1 != null) {
-                                    main.mInputText.removeTextChangedListener(watcher1);
+                                    main.mInputText.addTimeRecordTextWatcher();
+                                } else {
+                                    main.mInputText.removeTimeRecordTextWatcher();
                                 }
                             }
                         }
@@ -666,7 +1307,7 @@ public class ActionManager {
         UIUtil.isPopupEditing = true;
     }
 
-    private void onClickDateFormatChange() {
+    private void showDateFormatChangeDialog() {
         final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout_date_format, main.mRootLayout, false);
 
         // 날짜 형식
@@ -698,7 +1339,7 @@ public class ActionManager {
         UIUtil.isPopupEditing = true;
     }
 
-    private void onClickShortcutSetting() {
+    private void showShortcutSettingDialog() {
         final View contentView = LayoutInflater.from(main).inflate(R.layout.setting_layout_shortcut_setting, main.mRootLayout, false);
 
         // 라벨 구분자
@@ -732,7 +1373,64 @@ public class ActionManager {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void onClickCreateShortcut() {
+    private class ExportBackupFile extends PopupMenuManager.MenuFunction {
+        ExportBackupFile() {
+            titleRes = R.string.backup;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    exportBackupFile();
+                }
+            };
+        }
+    }
+
+    private void exportBackupFile() {
+        final String path = main.getString(R.string.app_name) + " (" + TimeUtil.getDefaultDateFormat(TimeUtil.getCurrentTime()) + ").txt";
+        File file = new File(main.getCacheDir(), path);
+        try {
+            FileWriter writer = new FileWriter(file);
+            writer.append(TimeUtil.getUTC());
+            for (int position = 1; position < main.mAdapter.getItemCount(); position++) {
+                BaseItem item = main.mAdapter.getItemAt(position);
+                if (item instanceof DateItem) {
+                    writer.append("\r\n     ");
+                    writer.append(((DateItem) item).getDateFormat());
+                    writer.append("\r\n");
+                    writer.flush();
+                } else if (item instanceof LogItem) {
+                    writer.append(((LogItem) item).getTimeString());
+                    writer.append(((LogItem) item).getText().replace("\n", "\r\n      "));
+                    writer.append("\r\n");
+                    writer.flush();
+                }
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Uri uri = FileProvider.getUriForFile(main, main.getPackageName()+".provider", file);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/txt");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        main.startActivity(Intent.createChooser(intent, main.getString(R.string.backup)));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class CreateShortcut extends PopupMenuManager.MenuFunction {
+        CreateShortcut() {
+            titleRes = R.string.shortcut;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    showCreateShortcutDialog();
+                }
+            };
+        }
+    }
+
+    private void showCreateShortcutDialog() {
         // Make Content View
         final EditText editText = new EditText(main);
         editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
@@ -778,6 +1476,9 @@ public class ActionManager {
     }
 
     private void createShortcut(String label) {
+        if (label == null) {
+            return;
+        }
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(main)) {
             String shortLabel = label.length() >= 10 ? label.substring(0, 10) : label; // 10자
             String longLabel = label.length() >= 25 ? label.substring(0, 25) : label; // 25자
@@ -805,12 +1506,38 @@ public class ActionManager {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void onClickHidden() {
+    private class StartHiddenActivity extends PopupMenuManager.MenuFunction {
+        StartHiddenActivity() {
+            titleRes = R.string.hidden;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    startHiddenActivity();
+                }
+            };
+        }
+    }
+
+    private void startHiddenActivity() {
         main.startActivity(new Intent(main, HiddenActivity.class));
         main.finish();
     }
 
-    private void onClickChangePassword() {
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class ChangePassword extends PopupMenuManager.MenuFunction {
+        ChangePassword() {
+            titleRes = R.string.change_password;
+            function = new Runnable() {
+                @Override
+                public void run() {
+                    showChangePasswordDialog();
+                }
+            };
+        }
+    }
+
+    private void showChangePasswordDialog() {
         if (HiddenActivity.mode != 2) {
             Toast.makeText(main, R.string.msg_password_first, Toast.LENGTH_SHORT).show();
         } else {
@@ -853,7 +1580,7 @@ public class ActionManager {
                 public void onClick(View v) {
                     if (editText.getText() != null) {
                         String afterPassword = editText.getText().toString();
-                        onClickPasswordChangeConfirm(dialog, afterPassword);
+                        changePassword(dialog, afterPassword);
                     }
                 }
             });
@@ -862,7 +1589,7 @@ public class ActionManager {
         }
     }
 
-    private void onClickPasswordChangeConfirm(final AlertDialog baseDialog, final String afterPassword) {
+    private void changePassword(final AlertDialog baseDialog, final String afterPassword) {
         AlertDialog dialog = new AlertDialog.Builder(main)
                 .setTitle(R.string.change_password)
                 .setMessage(main.getString(R.string.msg_password_changing, afterPassword))
@@ -880,8 +1607,6 @@ public class ActionManager {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -896,197 +1621,6 @@ public class ActionManager {
 
 
 
-    private void onClickLink(String linkText) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkText));
-        main.startActivity(browserIntent);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void onClickRemove(int position) {
-        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
-        if (item == null) {
-            return;
-        }
-        main.mAdapter.removeItem(position);
-        undoItem.set(item);
-        main.mDatabase.delete(item.getId());
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void onClickHighlight(int position) {
-        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
-        if (item == null) {
-            return;
-        }
-        item.setFlag(item.getFlag() == 1 ? 0 : 1);
-        main.mAdapter.notifyItemChanged(position);
-        main.mDatabase.updateFlag(item.getId(), item.getFlag());
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void onClickDateRemove(final int position) {
-        final ArrayList<Integer> idList = main.mAdapter.getIdsInDate(position);
-        AlertDialog dialog = new AlertDialog.Builder(main)
-                .setTitle(R.string.remove)
-                .setMessage(main.getString(R.string.remove_date_message, idList.size()))
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        main.mAdapter.removeItems(idList);
-                        main.mDatabase.deleteItems(idList);
-                        undoItem.clear();
-                    }
-                })
-                .create();
-        dialog.show();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void onClickSaveButton() {
-        LogItem item = null;
-        Editable text = main.mInputText.getText();
-        if (text != null) {
-            String string = text.toString();
-            if (string.length() > 0) {
-                item = main.mDatabase.insert(string, TimeUtil.getSaveTime());
-                main.mAdapter.addItem(item);
-                main.mInputText.getText().clear();
-            }
-            main.mRecView.scrollDown();
-            if (undoItem.exist() && item != null) {
-                if (undoItem.item.getId() == item.getId()) {
-                    undoItem.clear();
-                }
-            }
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void onClickUndo() {
-        if (undoItem.exist()) {
-            int position = main.mAdapter.restoreItem(undoItem.item);
-            main.mDatabase.insertOfItem(undoItem.item);
-            main.mRecView.scrollToItemPosition(position);
-            undoItem.clear();
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void onClickHide(int position) {
-        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
-        if (item == null) {
-            return;
-        }
-        main.mAdapter.removeItem(position);
-        main.mDatabase.delete(item.getId());
-        Database databaseHidden = new Database(main, Database.DATABASE_NAME_HIDDEN);
-        if (databaseHidden.existId(item.getId())) {
-            databaseHidden.insert(item.getText());
-        } else {
-            databaseHidden.insertOfItem(item);
-        }
-    }
-
-    private void onClickHideReturn(int position) {
-        final LogItem item = (LogItem) main.mAdapter.getItemAt(position);
-        if (item == null) {
-            return;
-        }
-        main.mAdapter.removeItem(position);
-        main.mDatabase.delete(item.getId());
-        Database databaseDefault = new Database(main, Database.DATABASE_NAME);
-        if (databaseDefault.existId(item.getId())) {
-            databaseDefault.insert(item.getText());
-        } else {
-            databaseDefault.insertOfItem(item);
-        }
-    }
-
-
-
-
-
-
-
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private String getDateSpan(DateItem dateItem, int position) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(dateItem.getDateString());
-        BaseItem item;
-        while (true) {
-            item = main.mAdapter.getItemAt(position);
-            if (!(item instanceof LogItem)) {
-                break;
-            }
-            sb.append("\r\n");
-            sb.append(((LogItem) item).getTimeString());
-            sb.append(((LogItem) item).getText().replace("\n", "\r\n      "));
-            position++;
-        }
-        return sb.toString();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void onClickTheme() {
-        PrefUtil.toggleThemeColorNumber(main);
-        ColorUtil.themeToggled(main);
-        themeAnimation.interStart = ColorUtil.currentInter;
-        main.mRootLayout.startAnimation(themeAnimation);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void exportFullBackupFile() {
-        final String path = main.getString(R.string.app_name) + " (" + TimeUtil.getDefaultDateFormat(TimeUtil.getCurrentTime()) + ").txt";
-        File file = new File(main.getCacheDir(), path);
-        try {
-            FileWriter writer = new FileWriter(file);
-            writer.append(TimeUtil.getUTC());
-            for (int position = 1; position < main.mAdapter.getItemCount(); position++) {
-                BaseItem item = main.mAdapter.getItemAt(position);
-                if (item instanceof DateItem) {
-                    writer.append("\r\n     ");
-                    writer.append(((DateItem) item).getDateFormat());
-                    writer.append("\r\n");
-                    writer.flush();
-                } else if (item instanceof LogItem) {
-                    writer.append(((LogItem) item).getTimeString());
-                    writer.append(((LogItem) item).getText().replace("\n", "\r\n      "));
-                    writer.append("\r\n");
-                    writer.flush();
-                }
-            }
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Uri uri = FileProvider.getUriForFile(main, main.getPackageName()+".provider", file);
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/txt");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        main.startActivity(Intent.createChooser(intent, main.getString(R.string.backup)));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -1101,31 +1635,7 @@ public class ActionManager {
 
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void copy(String text) {
-        ClipboardManager clipboard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null) {
-            ClipData clip = ClipData.newPlainText("content", text);
-            clipboard.setPrimaryClip(clip);
-            Toast.makeText(main, main.getString(R.string.copy_message), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void share(String text) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, text);
-        main.startActivity(Intent.createChooser(intent, "공유하기"));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -1143,7 +1653,7 @@ public class ActionManager {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 애니메이션
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private class ThemeAnimation extends Animation implements Animation.AnimationListener {
@@ -1180,23 +1690,5 @@ public class ActionManager {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private class UndoItem {
-        LogItem item = null;
-        void set(LogItem item) {
-            this.item = item;
-            main.mUndoButton.setVisibility(View.VISIBLE);
-        }
-        void clear() {
-            main.mUndoButton.setVisibility(View.GONE);
-            this.item = null;
-        }
-        boolean exist() {
-            return item != null;
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

@@ -35,7 +35,7 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
     private String searchString;
     private int focusPosition;
 
-    DataAdapter(Context context) {
+    public DataAdapter(Context context) {
         setHasStableIds(true);
         this.context = context;
     }
@@ -208,7 +208,7 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
         return position;
     }
 
-    public void removeItem(int position) {
+    public LogItem removeItem(int position) {
         LogItem item = (LogItem) itemList.getItemAt(position);
 
         // itemList 의 해당 position 위치 삭제 (위에 날짜 아이템 삭제해야 되면 그것도 삭제)
@@ -225,6 +225,8 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
         if (itemList != bItemList) {
             bItemList.removeItem(bItemList.getPositionById(item.getId()));
         }
+
+        return item;
     }
 
     public ArrayList<Integer> getIdsInDate(int position) {
@@ -237,10 +239,14 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
         return idList;
     }
 
-    public void removeItems(ArrayList<Integer> idList) {
+    public ArrayList<LogItem> removeItems(ArrayList<Integer> idList) {
+        ArrayList<LogItem> items = new ArrayList<>();
+        LogItem item;
         for (int id: idList) {
-            removeItem(itemList.getPositionById(id));
+            item = removeItem(itemList.getPositionById(id));
+            items.add(item);
         }
+        return items;
     }
 
     public BaseItem getItemAt(int position) {
@@ -283,8 +289,8 @@ public class DataAdapter extends RecyclerView.Adapter<BaseHolder> {
     // return: no push => -1
     //            push => until id (between[1] ~ until id - 1) -> (between[1] + 1 ~ until id)
     //                    between[1] = between[0] + 1
-    // insert id = between[0] + 1
-    public int timeInsertFindPushUntil(int[] betweenIds) {
+    // append id = between[0] + 1
+    public int  timeInsertFindPushUntil(int[] betweenIds) {
         if (betweenIds[1] - betweenIds[0] == 1) {
             int id = betweenIds[1];
             int p = bItemList.getPositionById(id);

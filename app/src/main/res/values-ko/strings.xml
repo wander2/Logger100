@@ -8,8 +8,8 @@
 
     <string name="edit_time">수정시 시간 갱신</string>
 
-    <string name="move_hidden_return">숨김 해제</string>
-    <string name="move_hidden">숨김</string>
+    <string name="reveal">숨김 해제</string>
+    <string name="hide">숨김</string>
     <string name="hidden">숨김</string>
     <string name="change_password">비밀번호 변경</string>
 
@@ -62,7 +62,7 @@
     <string name="right">오른쪽</string>
 
     <string name="change_time">시간 변경</string>
-    <string name="move">링크 열기</string>
+    <string name="open_link">링크 열기</string>
     <string name="shortcut_setting">바로가기 설정</string>
     <string name="saving_time_setting">저장시간 시점</string>
 
